@@ -1,0 +1,3 @@
+_keys/*.private*
+ansible.cfg
+hosts

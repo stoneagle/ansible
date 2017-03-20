@@ -1,0 +1,89 @@
+---
+- hosts: corp
+  vars_files:
+    # - ../inventory/vars/"{{ group }}"
+    - ../inventory/vars/develop
+  remote_user: wuzhongyang
+  tasks:
+    - name: install_vimx 
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: vim-X11.x86_64 
+        state: latest 
+      tags: install 
+    - name: install silver_searcher for vim plugin ag
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: the_silver_searcher
+        state: latest 
+      tags: install 
+    - name: install xsel for vim
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: xsel 
+        state: latest 
+      tags: install 
+    - name: get personal_conf from github
+      git:
+        repo: "{{ tool_git_href }}" 
+        dest: "{{ home_tool_dir }}" 
+        clone: yes 
+        update: yes
+      tags: github
+    - name: get vundle from github
+      git:
+        repo: "{{ vundle_git_href }}" 
+        dest: "{{ home_dir }}/.vim/bundle/Vundle.vim" 
+        clone: yes 
+        update: yes
+      tags: github
+    - name: check .vim dir exists
+      file:
+        path: "{{ home_vim_dir }}/bundle/Vundle.vim"
+        state: directory
+      tags: filelink 
+    - name: link colors for vim with the theme in personal_tool 
+      file:
+        src: "{{ home_tool_dir }}/colors"
+        dest: "{{ home_vim_dir }}/colors"
+        owner: "{{ owner }}"
+        group: "{{ group }}" 
+        state: link 
+      tags: filelink 
+    - name: link ftplugin for vim with the theme in personal_tool 
+      file:
+        src: "{{ home_tool_dir }}/ftplugin"
+        dest: "{{ home_vim_dir }}/ftplugin"
+        owner: "{{ owner }}"
+        group: "{{ group }}" 
+        state: link 
+      tags: filelink 
+    - name: link UltiSnips for vim with the theme in personal_tool 
+      file:
+        src: "{{ home_tool_dir }}/UltiSnips"
+        dest: "{{ home_vim_dir }}/UltiSnips"
+        owner: "{{ owner }}" 
+        group: "{{ group }}" 
+        state: link 
+      tags: filelink 
+    - name: link .vimrc for vim 
+      file:
+        src: "{{ home_tool_dir }}/.vimrc"
+        dest: "{{ home_vim_dir }}/.vimrc"
+        owner: "{{ owner }}" 
+        group: "{{ group }}" 
+        state: link 
+      tags: filelink 
+    - name: install vim plugin
+      # shell: vim -E -s -c "source {{ home_dir }}/.vimrc" +PluginInstall +qall -V 
+      # 当插件较多时，这部分会比较慢
+      shell: vim +PluginInstall +qall 
+      ignore_errors: yes
+      tags: plugin 
+

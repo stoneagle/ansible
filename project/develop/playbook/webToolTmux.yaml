@@ -1,0 +1,36 @@
+---
+- hosts: corp
+  vars_files:
+    # - ../inventory/vars/"{{ group }}"
+    - ../inventory/vars/develop
+  remote_user: wuzhongyang
+  tasks:
+    - name: install tmux 
+      become: yes
+      become_user: root
+      become_method: sudo
+      yum:
+        name: tmux 
+        state: latest 
+      tags: install 
+    - name: get personal_conf from github
+      git:
+        repo: "{{ tool_git_href }}" 
+        dest: "{{ home_tool_dir }}" 
+        clone: no 
+        update: yes
+      tags: github
+    - name: remove init .zshrc file 
+      file:
+        path: "{{ home_dir }}/.tmux.conf"
+        state: absent 
+      tags: file 
+    - name: link tmux.conf from personal tool
+      file:
+        src: "{{ home_tool_dir }}/.tmux.conf"
+        dest: "{{ home_dir }}/.tmux.conf"
+        owner: "{{ owner }}"
+        group: "{{ group }}" 
+        state: link 
+      tags: file
+
