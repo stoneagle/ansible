@@ -1,0 +1,24 @@
+- service:
+  - ntp
+  - numad
+- command:
+  - xfs_growfs 
+  - lvcreate
+  - tuned-adm
+- other:
+  - unarchive
+  - unarchive
+  - selinux
+  - firewalld
+  - register
+  - with_items
+- yum:
+  - ack
+  - htop
+  - sysstat
+  - mlocate
+  - bash-completion
+  - vim
+  - centos-release-gluster37
+  - glusterfs-server,glusterfs
+
