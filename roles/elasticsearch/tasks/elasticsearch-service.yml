@@ -1,0 +1,19 @@
+---
+
+- name: 根据默认模板生成实例系统配置 
+  template:
+    src: sysconfig/elasticsearch.j2
+    dest: "/etc/sysconfig/elasticsearch-{{ es_instance_name }}"
+    mode: 0644 
+    force: yes
+
+- name: 复制系统服务执行文件 
+  template:
+    src: systemd/elasticsearch.service.j2
+    dest: "/etc/systemd/system/elasticsearch-{{ es_instance_name }}.service"
+    mode: 0644 
+    force: yes
+
+- name: 重启系统服务
+  command: systemctl daemon-reload
+

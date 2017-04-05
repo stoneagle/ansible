@@ -1,0 +1,36 @@
+---
+- hosts: corp
+  vars_files:
+    # - ../inventory/vars/"{{ group }}"
+    - ../inventory/vars/develop
+  remote_user: wuzhongyang
+  tasks:
+    - name: 安装tmux 
+      become: yes
+      become_user: root
+      become_method: sudo
+      yum:
+        name: tmux 
+        state: latest 
+      tags: install 
+    - name: 从github获取personal_conf 
+      git:
+        repo: "{{ tool_git_href }}" 
+        dest: "{{ home_tool_dir }}" 
+        clone: no 
+        update: yes
+      tags: github
+    - name: 删除初始化的tmux配置文件 
+      file:
+        path: "{{ home_dir }}/.tmux.conf"
+        state: absent 
+      tags: file 
+    - name: 创建个人tmux的配置文件软链
+      file:
+        src: "{{ home_tool_dir }}/.tmux.conf"
+        dest: "{{ home_dir }}/.tmux.conf"
+        owner: "{{ owner }}"
+        group: "{{ group }}" 
+        state: link 
+      tags: file
+

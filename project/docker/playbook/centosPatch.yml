@@ -1,0 +1,17 @@
+---
+- hosts: "{{ group }}"
+  tasks:
+    - name: 下载centos7.2安装包
+      get_url: 
+        url: http://101.198.162.179/centos7.2.tar.gz 
+        dest: /tmp
+    - name: 解压缩安装包
+      command: tar xzf centos7.2.tar.gz chdir=/tmp
+    - name: 执行安装程序
+      command: sh install.sh chdir=/tmp/x86_64
+    - name: 删除下载内容
+      command: rm -rf centos7.2.tar.gz x86_64 certs chdir=/tmp
+    - name: 重启系统
+      command: reboot
+  become: yes
+  gather_facts: no

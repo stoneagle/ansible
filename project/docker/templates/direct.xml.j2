@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<direct>
+  <chain table="filter" ipv="ipv4" chain="DOCKER-ISOLATION"/>
+  <!-- No Ping -->
+  <rule priority="0" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p icmp --icmp-type echo-request -j DROP</rule>
+
+  <!-- DNS -->
+  <rule priority="0" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p udp -d 0.0.0.0/0 --dport 53 -j RETURN</rule>
+  <rule priority="0" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d 0.0.0.0/0 --dport 53 -j RETURN</rule>
+
+  <!-- Docker Registry (Hub) -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d xxx/32 --dport 443 -j RETURN</rule>
+  <!-- Kubernetes Cluster Network -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p all -d 10.254.0.0/16 -j RETURN</rule>
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p all -d 172.17.0.0/16 -j RETURN</rule>
+
+{% for host in firewalld['k8s_masters'] %}
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d {{ host }} --dport 443 -j RETURN</rule>
+  {% endfor %}
+
+{% for network in lvs_vips %}
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d {{ network }} ! --dport 1:1024 -m comment --comment "lvs vip network" -j RETURN</rule>
+{% endfor %}
+{% for network in lvs_vips %}
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p udp -d {{ network }} ! --dport 1:1024 -m comment --comment "lvs vip network" -j RETURN</rule>
+{% endfor %}
+
+  <!-- Sentry -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d yyy --dport 80 -j RETURN</rule>
+  <!-- InfluxDB -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d xxx ! --dport 1:2000 -j RETURN</rule>
+  <!-- ElasticSearch/Logstash -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d xxx ! --dport 1:2000 -j RETURN</rule>
+  <!-- etcd -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d 10.0.0.0/8 --dport 2379:2380 -j RETURN</rule>
+  <!-- Zookeeper -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d 0.0.0.0/0 --dport 2181 -j RETURN</rule>
+  <!-- QBus/Kafka -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d 0.0.0.0/0 --dport 9092 -j RETURN</rule>
+  <!-- MySQL -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d 10.0.0.0/8 --dport 3400:3999 -j RETURN</rule>
+  <!-- Redis -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d 10.0.0.0/8 --dport 6000:6999 -j RETURN</rule>
+  <!-- MongoDB -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d 10.0.0.0/8 --dport 7000:7999 -j RETURN</rule>
+  <!-- zzzc.lvs_cluster.share_1 thrift.zzzc -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d xxx --dport 9090 -j RETURN</rule>
+
+  <!-- WebCache -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -d 10.0.0.0/8 --dport 9901 -j RETURN</rule>
+
+  <!-- Block Other Intranet Traffic -->
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p udp -d 10.0.0.0/8 --dport 1:10000 -j DROP</rule>
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -m state --state NEW -d 10.0.0.0/8 --dport 1:10000 -j DROP</rule>
+  <rule priority="1" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -m state --state NEW -d 10.0.0.0/8 ! --dport 1:10000 -j RETURN</rule>
+
+  <!-- Web Service for Intranet/Internet Public Address -->
+  <rule priority="2" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -m state --state NEW --dport 80 -j RETURN</rule>
+  <rule priority="2" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -m state --state NEW --dport 443 -j RETURN</rule>
+
+  <!-- Block All Low Port Traffic (Except RETURNs Above) -->
+  <rule priority="3" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p udp --dport 1:1024 -j DROP</rule>
+  <rule priority="3" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -m state --state NEW --dport 1:1024 -j DROP</rule>
+
+  <!-- Block Intranet Public Address Traffic -->
+  <rule priority="4" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-p tcp -m state --state NEW -d xxx/27 --dport 1:10000 -j DROP</rule>
+
+  <rule priority="5" table="filter" ipv="ipv4" chain="DOCKER-ISOLATION">-j RETURN</rule>
+</direct>
+

@@ -1,0 +1,32 @@
+---
+- name: 创建Filebeat目录
+  file: 
+    state: directory 
+    path: "{{ filebeat_home }}" 
+    owner: "{{ filebeat_user }}" 
+    group: "{{ filebeat_group }}" 
+    recurse: yes
+
+- name: 解压缩filebeat压缩包
+  unarchive:
+    src: "releases/{{ filebeat_release }}.tar.gz"
+    dest: "{{ filebeat_home }}"
+    creates: "{{ filebeat_home }}/{{ filebeat_release }}"
+  environment:
+    LANG: C
+    LC_ALL: C
+    LC_MESSAGES: C
+
+- name: 设置filebeat的权限
+- file:
+    path: "{{ filebeat_home }}/{{ filebeat_release }}"
+    owner: "{{ filebeat_user }}" 
+    group: "{{ filebeat_group }}" 
+    recurse: yes
+
+- file:
+    path: "{{ filebeat_home }}/filebeat"
+    src: "{{ filebeat_home }}/{{ filebeat_release }}"
+    owner: "{{ filebeat_user }}" 
+    group: "{{ filebeat_group }}" 
+    state: link

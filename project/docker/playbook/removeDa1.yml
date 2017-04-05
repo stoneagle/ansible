@@ -1,0 +1,28 @@
+---
+- hosts: "{{ group }}" 
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: 杀死svscanboot
+      command: pkill -f "/bin/sh /usr/local/bin/svscanboot" 
+    - name: 备份/da1 
+      command:  cp -rp /da1 /da2
+    - name: 卸载/da1
+      mount:
+        name: /da1
+        src: /dev/mapper/VolGroup00-LogVol--da1
+        fstype: ext4
+        state: absent
+    - name: 确认/da1已卸载
+      file:
+        path: /da1
+        state: absent
+    - name: 还原备份/da1
+      command: mv /da2 /da1
+    - name: 卸载/da1逻辑卷
+      lvol: 
+        vg: VolGroup00
+        lv: LogVol-da1
+        state: absent
+        force: yes

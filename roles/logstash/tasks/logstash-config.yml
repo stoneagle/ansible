@@ -1,0 +1,49 @@
+---
+
+- name: 创建日志目录 
+  file: 
+    state: directory 
+    path: "{{ ls_log_dir }}" 
+    owner: "{{ ls_user }}" 
+    group: "{{ ls_group }}"
+
+- name: 创建配置目录 
+  file: 
+    state: directory 
+    path: "{{ ls_conf_dir }}" 
+    owner: "{{ ls_user }}" 
+    group: "{{ ls_group }}"
+
+- name: 拷贝logstash脚本的实例
+  template:
+    src: logstash.sh.j2
+    dest: "{{ ls_instance_home }}/logstash.sh"
+    owner: "{{ ls_user }}" 
+    group: "{{ ls_group }}" 
+    mode: 0655 
+    force: yes
+
+- name: Logstash输入配置
+  template:
+    src: conf.d/input.conf.j2
+    dest: "{{ ls_conf_dir }}/input.conf"
+    owner: "{{ ls_user }}" 
+    group: "{{ ls_group }}" 
+    mode: 0644
+
+- name: Logstash筛选配置
+  template:
+    src: conf.d/filters.conf.j2
+    dest: "{{ ls_conf_dir }}/filters.conf"
+    owner: "{{ ls_user }}" 
+    group: "{{ ls_group }}" 
+    mode: 0644
+
+- name: Logstash输出配置
+  template:
+    src: conf.d/output.conf.j2
+    dest: "{{ ls_conf_dir }}/output.conf"
+    owner: "{{ ls_user }}" 
+    group: "{{ ls_group }}" 
+    mode: 0644
+

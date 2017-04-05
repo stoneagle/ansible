@@ -1,0 +1,17 @@
+---
+- hosts: "{{ dc }}"
+  tasks:
+    # Path: /tmp
+    - lvol: vg=VolGroup00 lv=LogVol01 size=16g
+    - command: xfs_growfs /dev/VolGroup00/LogVol01
+    # Path: /var
+    - lvol: vg=VolGroup00 lv=LogVol02 size=64g
+    - command: xfs_growfs /dev/VolGroup00/LogVol02
+    # Path: /
+    - lvol: vg=VolGroup00 lv=LogVol03 size=195g
+    - command: xfs_growfs /dev/VolGroup00/LogVol03
+
+    - filesystem: fstype=xfs dev=/dev/memdiska
+    - mount: name=/data src=/dev/memdiska fstype=xfs opts="defaults" state=mounted
+  sudo: yes
+  gather_facts: no

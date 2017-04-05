@@ -1,0 +1,13 @@
+---
+- hosts: "{{ group }}"
+  tasks:
+    - name: 初始化filebeat的目录 
+      file: 
+        path: "/data/usr/filebeat" 
+        state: directory
+    - name: 根据模板生成filebeat的yml文件 
+      template: 
+        src: ../templates/filebeat.yaml.j2 
+        dest: /data/usr/filebeat/kube-filebeat.yml
+  become: yes
+  gather_facts: yes

@@ -1,0 +1,12 @@
+---
+
+# Copy the filebeat.sh
+- name: 复制Filebeat控制脚本
+  template:
+    src: filebeat.sh.j2
+    dest: "{{ filebeat_home }}/filebeat.sh"
+    owner: "{{ filebeat_user }}" 
+    group: "{{ filebeat_group }}" 
+    mode: 0755 
+    force: yes
+

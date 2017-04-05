@@ -1,0 +1,36 @@
+---
+- hosts: corp
+  vars_files:
+    # - ../inventory/vars/"{{ group }}"
+    - ../inventory/vars/develop
+  remote_user: wuzhongyang
+  tasks:
+    - name: 下载go的亚索包 
+      get_url: 
+        url: https://storage.googleapis.com/golang/go1.8.linux-amd64.tar.gz
+        dest: "{{ home_dir }}"
+      tags: download
+    - name: 解压缩go的压缩包 
+      unarchive: 
+        src: "{{ home_dir }}/go1.8.linux-amd64.tar.gz"
+        dest: "{{ home_dir }}"
+        remote_src: true
+      tags: file
+    - name: 删除go的压缩包 
+      file:
+        path: "{{ home_dir }}/go1.8.linux-amd64.tar.gz"
+        state: absent
+      tags : file
+    - name: 安装vim中的go插件 
+      # 需要zsh的支持
+      shell: /bin/zsh -l -c "vim +GoInstallBinaries +qall"
+      args:
+        chdir: "{{ home_dir }}"
+      ignore_errors: yes
+      tags: plugin 
+    - name:  创建go项目的文件夹 
+      file:
+        path: "{{ home_dir }}/go_project/src"
+        state: directory
+      tags: file 
+

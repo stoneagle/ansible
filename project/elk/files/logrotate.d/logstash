@@ -1,0 +1,9 @@
+/data/log/logstash/*.log {
+    daily
+    rotate 14
+    missingok
+    notifempty
+    copytruncate
+    compress
+    delaycompress
+}

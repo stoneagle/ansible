@@ -1,0 +1,15 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - inventory/vars/{{ group }}
+  roles:
+    - logstash
+  tasks:
+    - name: 复制logstash的脚本
+      copy: 
+        src: "files/logrotate.d/logstash" 
+        dest: "/etc/logrotate.d"
+    # - name: 执行logstash的命令
+    #   command: "{{ ls_instance_home }}/logstash.sh {{ cmd }}"
+  become: yes
+  gather_facts: yes

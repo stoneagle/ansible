@@ -1,0 +1,69 @@
+---
+- name: 创建etcd根目录
+  file: 
+    state: directory 
+    path: "{{ etcd_home }}" 
+    owner: "{{ etcd_user }}" 
+    group: "{{ etcd_group }}" 
+    recurse: yes
+
+- name: 创建etcd的data目录 
+  file: 
+    state: directory 
+    path: "{{ etcd_config['data-dir'] }}"
+    owner: "{{ etcd_user }}" 
+    group: "{{ etcd_group }}" 
+    recurse: yes
+
+- name: 解压缩etcd资源包
+  unarchive:
+    src: "releases/{{ etcd_release }}.tar.gz"
+    dest: "{{ etcd_home }}"
+    creates: "{{ etcd_home }}/{{ etcd_release }}"
+
+- name: 修改etcd内容的权限 
+  file:
+    path: "{{ etcd_home }}/{{ etcd_release }}"
+    owner: "{{ etcd_user }}" 
+    group: "{{ etcd_group }}" 
+    recurse: yes
+
+- name: 生成etcd的软链 
+  file:
+    path: "{{ etcd_home }}/etcd"
+    src: "{{ etcd_home }}/{{ etcd_release }}"
+    owner: "{{ etcd_user }}" 
+    group: "{{ etcd_group }}" 
+    state: link
+
+- name: 复制certs至目标目录 
+  copy:
+    src: certs
+    dest: "{{ etcd_home }}/"
+    owner: root 
+    group: root 
+    mode: 'u=rw,g=r,o=r'
+
+- name: 根据template生成etcd.rc 
+  template:
+    src: "etcd.rc.j2"
+    dest: "{{ etcd_home }}/etcd.rc"
+    owner: "{{ etcd_user }}" 
+    group: "{{ etcd_group }}"
+
+- name: 根据template生成etcd.sh
+  template:
+    src: "etcd.sh.j2"
+    dest: "{{ etcd_home }}/etcd.sh"
+    owner: "{{ etcd_user }}" 
+    group: "{{ etcd_group }}" 
+    mode: 0755
+
+- name: 根据template生成etcd的系统服务
+  template:
+    src: "etcd.service.j2"
+    dest: "/etc/systemd/system/etcd-{{ etcd_config['client-port'] }}.service"
+
+- name: 重启系统服务 
+  command: systemctl daemon-reload
+

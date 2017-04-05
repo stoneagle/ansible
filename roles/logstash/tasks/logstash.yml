@@ -1,0 +1,31 @@
+---
+
+- name: 创建logstash目录 
+  file: 
+    state: directory 
+    path: "{{ ls_instance_home }}" 
+    owner: "{{ ls_user }}" 
+    group: "{{ ls_group }}" 
+    recurse: yes
+
+- name: 解压缩logstash的安装包
+  unarchive:
+    src: "releases/logstash-{{ ls_release }}.tar.gz"
+    dest: "{{ ls_instance_home }}"
+    creates: "{{ ls_instance_home }}/logstash-{{ ls_release }}"
+
+- name: 更改logstash目录的权限
+- file:
+    path: "{{ ls_instance_home }}/logstash-{{ ls_release }}"
+    owner: "{{ ls_user }}" 
+    group: "{{ ls_group }}" 
+    recurse: yes
+
+- name: 创建logstash的软链
+  file:
+    path: "{{ ls_home }}"
+    src: "{{ ls_instance_home }}/logstash-{{ ls_release }}"
+    owner: "{{ ls_user }}" 
+    group: "{{ ls_group }}" 
+    state: link
+

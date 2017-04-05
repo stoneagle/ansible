@@ -1,3 +1,0 @@
-[corp]
-**.**.***.** ansible_connection=ssh ansible_ssh_user=wuzhongyang ansible_ssh_private_key_file=/home/wuzhongyang/ansible/_keys/id_dsa.private
-# localhost ansible_connection=local

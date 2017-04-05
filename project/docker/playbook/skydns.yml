@@ -1,0 +1,15 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    - name: 根据模板生成skydns-rc配置
+      template:
+        src: "../templates/dns/skydns-rc.yaml.j2"
+        dest: "/tmp/skydns-rc.yaml"
+    - name: 根据模板生成skydns-svc配置
+      template:
+        src: "../templates/dns/skydns-svc.yaml.j2"
+        dest: "/tmp/skydns-svc.yaml"
+  become: search
+  gather_facts: yes

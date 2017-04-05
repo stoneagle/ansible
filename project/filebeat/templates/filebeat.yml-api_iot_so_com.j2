@@ -1,0 +1,62 @@
+################### Filebeat Configuration Example #########################
+
+############################# Filebeat ######################################
+filebeat:
+  # List of prospectors to fetch data.
+  prospectors:
+    -
+      paths:
+        - /XXX/access.log
+      encoding: plain
+      input_type: log
+      fields:
+        es_index: xxx 
+      document_type: nginx-access
+      scan_frequency: 10s
+
+    -
+      paths:
+        - /YYY/error.log
+      encoding: plain
+      input_type: log
+      fields:
+        es_index: yyy 
+      document_type: nginx-error
+      multiline:
+          pattern: ^20
+          negate: true
+          match: after
+      scan_frequency: 10s
+
+  # General filebeat configuration options
+  registry_file: /tmp/filebeat
+
+############################# Libbeat Config ##################################
+# Base config file used by all other beats for using libbeat features
+
+############################# Output ##########################################
+
+# Configure what outputs to use when sending the data collected by the beat.
+# Multiple outputs may be used.
+output:
+  ### Logstash as output
+  logstash:
+    # The Logstash hosts
+    hosts: ["{{ filebeat_logstash|join('","') }}"]
+    worker: 1
+    compression_level: 3
+    loadbalance: true
+
+  # console:
+    #pretty
+
+############################# Shipper #########################################
+
+shipper:
+  tags: ["{{ filebeat_tags|join('","') }}"]
+
+
+############################# Logging #########################################
+
+logging:
+

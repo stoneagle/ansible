@@ -1,0 +1,14 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    # Public Service
+    - firewalld: permanent=yes zone=public port=5044/tcp state=enabled
+    - firewalld: permanent=yes zone=public port=5144/tcp state=enabled
+    - firewalld: permanent=yes zone=public port=5244/tcp state=enabled
+    - firewalld: permanent=yes zone=public port=5344/tcp state=enabled
+    - firewalld: permanent=yes zone=public port=5444/tcp state=enabled
+    - command: firewall-cmd --reload
+  become: yes
+  gather_facts: no

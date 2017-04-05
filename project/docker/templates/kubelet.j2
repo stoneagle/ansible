@@ -1,0 +1,24 @@
+# --logtostderr=true: log to standard error instead of files
+KUBE_LOGTOSTDERR="--logtostderr=true"
+
+#  --v=0: log level for V logs
+KUBE_LOG_LEVEL="--v=4"
+
+# --address=0.0.0.0: The IP address for the Kubelet to serve on (set to 0.0.0.0 for all interfaces)
+NODE_ADDRESS="--address={{ ansible_eth0.ipv4.address }}"
+
+# --port=10250: The port for the Kubelet to serve on. Note that "kubectl logs" will not work if you set this flag.
+#NODE_PORT="--port=10250 --read-only-port=10255"
+
+# --hostname-override="": If non-empty, will use this string as identification instead of the actual hostname.
+#NODE_HOSTNAME="--hostname-override="
+
+# --api-servers=[]: List of Kubernetes API servers for publishing events, 
+# and reading pods and services. (ip:port), comma separated.
+KUBELET_API_SERVER="--api-servers={{ kube_api_servers }}"
+
+# --allow-privileged=false: If true, allow containers to request privileged mode. [default=false]
+KUBE_ALLOW_PRIV="--allow-privileged=false"
+
+# Add your own!
+KUBELET_ARGS="--config={{ kube_home }}/manifests --kubeconfig={{ kube_home }}/kubeconfig --cluster-dns={{ kube_dns_server_ip }} --image-gc-high-threshold=60 --image-gc-low-threshold=40 --pod-infra-container-image=cloud/rhel7/pod-infrastructure --tls-cert-file={{ kube_home }}/certs/{{ ansible_nodename }}.pem --tls-private-key-file={{ kube_home }}/certs/{{ ansible_nodename }}-key.pem"

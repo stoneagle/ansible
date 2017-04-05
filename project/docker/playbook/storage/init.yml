@@ -1,0 +1,78 @@
+---
+# 1.6T * 1
+#
+# NAME                    MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+# sda                       8:0    0  1.6T  0 disk 
+# ├─sda1                    8:1    0    1G  0 part /boot
+# └─sda2                    8:2    0  1.6T  0 part 
+#   ├─VolGroup00-LogVol03 253:0    0   20G  0 lvm  /
+#   ├─VolGroup00-LogVol00 253:1    0 31.4G  0 lvm  [SWAP]
+#   ├─VolGroup00-LogVol02 253:2    0    4G  0 lvm  /var
+#   └─VolGroup00-LogVol01 253:3    0    1G  0 lvm  /tmp 
+- hosts: "{{ group }}"
+  tasks:
+    - name: 创建docker thin pool
+      command: lvcreate -L 200g --thin VolGroup00/ThinPool00
+      tags: docker
+    
+    - name: 初始化NFS的gfs空间
+      file: 
+        state: directory 
+        path: /gfs
+      tags: gfs
+    - name: 创建NFS的逻辑卷LogVol04
+      lvol: 
+        vg: VolGroup00 
+        lv: LogVol04 
+        size: 1000g
+      tags: gfs
+    - name: 设置NFS逻辑卷的文件系统
+      filesystem: 
+        fstype: xfs 
+        dev: /dev/VolGroup00/LogVol04
+      tags: gfs
+    - name: 挂载GFS的第一个砖块
+      mount: 
+        name: /gfs/brick0 
+        src: /dev/VolGroup00/LogVol04 
+        fstype: xfs 
+        opts: "defaults" 
+        state: mounted
+      tags: gfs
+    
+    - name: 设置并调整LogVol01的空间大小，对应/tmp
+      lvol: 
+        vg: VolGroup00 
+        lv: LogVol01 
+        size: 100g
+      tags: lvm 
+    - name: 扩展LogVol01的XFS文件系统 
+      command: xfs_growfs /dev/VolGroup00/LogVol01
+      tags: lvm 
+    - name: 设置并调整LogVol02的空间大小，对应/var
+      lvol: 
+        vg: VolGroup00 
+        lv: LogVol02 
+        size: 100g
+        force: yes
+      tags: lvm 
+    - name: 扩展LogVol02的XFS文件系统 
+      command: xfs_growfs /dev/VolGroup00/LogVol02
+      tags: lvm 
+    - name: 设置并调整LogVol03的空间大小，对应/
+      lvol: 
+        vg: VolGroup00 
+        lv: LogVol03 
+        size: 200g
+      tags: lvm 
+    - name: 扩展LogVol03的XFS文件系统 
+      command: xfs_growfs /dev/VolGroup00/LogVol03
+      tags: lvm 
+
+    - name: 初始化/data目录
+      file:
+        state: directory
+        path: /data
+      tags: init 
+  become: yes
+  gather_facts: no

@@ -1,0 +1,65 @@
+---
+- hosts: "{{ group }}"
+  tasks:
+    - name: 复制docker的repo 
+      copy: 
+        src: ../files/Docker.repo 
+        dest: /etc/yum.repos.d/
+    - name: 安装docker-engine
+      yum: 
+        name: docker-engine 
+        state: latest
+
+    - name: 复制docker系统服务
+      copy: 
+        src: ../files/system/docker.service.d 
+        dest: /etc/systemd/system/
+
+    - name: 检查linux系统配置文件中，网桥arptables的设定 
+      lineinfile:
+        dest: /etc/sysctl.d/99-sysctl.conf
+        state: present
+        line: "net.bridge.bridge-nf-call-arptables = 1"
+    - name: 检查linux系统配置文件中，网桥ip6tables的设定 
+      lineinfile:
+        dest: /etc/sysctl.d/99-sysctl.conf
+        state: present
+        line: "net.bridge.bridge-nf-call-ip6tables = 1"
+    - name: 检查linux系统配置文件中，网桥iptables的设定 
+      lineinfile:
+        dest: /etc/sysctl.d/99-sysctl.conf
+        state: present
+        line: "net.bridge.bridge-nf-call-iptables = 1"
+
+    - name: 重启系统服务
+      command: systemctl daemon-reload
+    - name: 启用docker
+      service: 
+        name: docker 
+        enabled: yes
+    - name: 启动docker
+      service: 
+        name: docker 
+        state: started
+
+    - name: 初始化docker目录
+      file: 
+        path: "/root/.docker" 
+        state: directory
+    - name: 复制docker的配置json
+      copy: 
+        src: ../files/docker.config 
+        dest: /root/.docker/config.json
+
+    - name: 拉取rhel7的镜像
+      command: docker pull cloud/rhel7/pod-infrastructure
+    - name: 拉取hyperkube镜像 
+      command: docker pull cloud/google_containers/hyperkube:v1.3.0
+
+#   - service: name=kubelet enabled=yes
+#   - service: name=kubelet state=started
+#   - service: name=kube-proxy enabled=yes
+#   - service: name=kube-proxy state=started
+
+  become: yes
+  gather_facts: no

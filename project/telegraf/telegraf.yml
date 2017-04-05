@@ -1,0 +1,18 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - "inventory/vars/{{ group }}"
+    - "inventory/vars/{{ vault }}.vault"
+  remote_user: search
+  roles:
+    - telegraf
+  tasks:
+    - name: 设置telegraf配置
+    - template:
+        src: "templates/{{ telegraf_template }}"
+        dest: "{{ telegraf_config }}"
+        owner: "{{ telegraf_user }}" 
+        group: "{{ telegraf_group }}"
+      tags: configuration
+  become: no
+  gather_facts: yes

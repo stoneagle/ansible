@@ -1,0 +1,49 @@
+# NAME                    MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINT
+# sda                       8:0    0 931.5G  0 disk  
+# ├─sda1                    8:1    0     1G  0 part  /boot
+# └─sda2                    8:2    0 930.5G  0 part  
+#   ├─VolGroup00-LogVol03 253:0    0    20G  0 lvm   /
+#   ├─VolGroup00-LogVol00 253:1    0     4G  0 lvm   [SWAP]
+#   ├─VolGroup00-LogVol02 253:2    0     4G  0 lvm   /var
+#   └─VolGroup00-LogVol01 253:3    0     1G  0 lvm   /tmp
+# sdb                       8:16   0 279.5G  0 disk  
+# └─md127                   9:127  0   1.4T  0 raid0 
+# sdc                       8:32   0 279.5G  0 disk  
+# └─md127                   9:127  0   1.4T  0 raid0 
+# sdd                       8:48   0 279.5G  0 disk  
+# └─md127                   9:127  0   1.4T  0 raid0 
+# sde                       8:64   0 279.5G  0 disk  
+# └─md127                   9:127  0   1.4T  0 raid0 
+# sdf                       8:80   0 279.5G  0 disk  
+# └─md127                   9:127  0   1.4T  0 raid0 
+
+---
+- hosts: "{{ group }}"
+  tasks:
+    # Path: /tmp
+    - lvol: vg=VolGroup00 lv=LogVol01 size=20g
+    - command: xfs_growfs /dev/VolGroup00/LogVol01
+    # Path: /var
+    - lvol: vg=VolGroup00 lv=LogVol02 size=200g
+    - command: xfs_growfs /dev/VolGroup00/LogVol02
+    # Path: /
+    - lvol: vg=VolGroup00 lv=LogVol03 size=300g
+    - command: xfs_growfs /dev/VolGroup00/LogVol03
+
+    # Path: /data
+    - lvol: vg=VolGroup00 lv=LogVol04 size=100%FREE
+    - filesystem: fstype=xfs dev=/dev/VolGroup00/LogVol04
+    - mount: name=/data src=/dev/VolGroup00/LogVol04 fstype=xfs opts="defaults" state=mounted
+    - command: xfs_growfs /dev/VolGroup00/LogVol04
+
+    - file: path="/data/usr" state=directory
+    - file: path="/data/var" state=directory
+    - file: path="/data/var/run" state=directory mode=777
+    - file: path="/data/log" state=directory
+
+    # Path: /data/var/lib
+    - filesystem: fstype=xfs dev=/dev/md127
+    - mount: name=/data/var/lib src=/dev/md127 fstype=xfs opts="defaults" state=mounted
+
+  become: yes
+  gather_facts: no

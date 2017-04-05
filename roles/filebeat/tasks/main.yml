@@ -1,0 +1,3 @@
+---
+- include: filebeat.yml
+- include: filebeat-config.yml

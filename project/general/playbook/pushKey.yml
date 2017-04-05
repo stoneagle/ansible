@@ -1,0 +1,21 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/develop
+  tasks:
+    - name: 推送钥匙 
+      authorized_key:
+        user: wuzhongyang
+        key: "{{ lookup('file', '{{ ansible_root }}/_keys/id_dsa.private.pub') }}"
+        state: present
+        exclusive: yes
+      tags: key
+    - name: 钥匙检验
+      file:
+        path: /home
+        state: directory 
+      tags: check 
+  # become: yes
+  # become_user: root
+  # become_method: sudo
+

@@ -1,0 +1,32 @@
+---
+- debug: msg="Node configuration {{ es_config }} "
+
+- name: 创建es目录 
+  file: 
+    state: directory 
+    path: "{{ es_instance_home }}" 
+    owner: "{{ es_user }}" 
+    group: "{{ es_group }}" 
+    recurse: yes
+
+- name: 解压缩es安装包
+  unarchive:
+    src: "releases/elasticsearch-{{ es_release }}.tar.gz"
+    dest: "{{ es_instance_home }}"
+    creates: "{{ es_instance_home }}/elasticsearch-{{ es_release }}"
+
+- name: 修改es目录权限
+  file:
+    path: "{{ es_instance_home }}/elasticsearch-{{ es_release }}"
+    owner: "{{ es_user }}" 
+    group: "{{ es_group }}" 
+    recurse: yes
+
+- name: 创建es软链 
+  file:
+    path: "{{ es_home }}"
+    src: "{{ es_instance_home }}/elasticsearch-{{ es_release }}"
+    owner: "{{ es_user }}" 
+    group: "{{ es_group }}" 
+    state: link
+

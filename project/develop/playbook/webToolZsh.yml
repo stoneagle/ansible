@@ -1,0 +1,54 @@
+---
+- hosts: corp
+  vars_files:
+    # - ../inventory/vars/"{{ group }}"
+    - ../inventory/vars/develop
+  remote_user: wuzhongyang
+  tasks:
+    - name: 安装并检查zsh 
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: zsh
+        state: present
+      tags: install 
+    - name: 从github获取个人配置
+      git:
+        repo: "{{ tool_git_href }}" 
+        dest: "{{ home_tool_dir }}" 
+        clone: no 
+        update: yes
+      tags: github
+    - name: 检查zsh是否存在 
+      yum:
+        name: zsh
+        state: present
+      tags: file 
+    - name: 下载oh-my-zsh
+      shell: sh "{{ home_tool_dir }}/oh-my-zsh-install.sh" 
+      tags: file 
+    - name: 删除初始的.zshrc文件
+      file:
+        path: "{{ home_dir }}/.zshrc"
+        state: absent 
+      tags: file 
+    - name: 新增.zshrc的软链
+      file:
+        src: "{{ home_tool_dir }}/.zshrc"
+        dest: "{{ home_dir }}/.zshrc"
+        owner: "{{ owner }}"
+        group: "{{ group }}" 
+        state: link 
+      tags: file 
+    - name: 设置zsh为默认shell
+      # 需要提交密码
+      shell: "chsh -s /bin/zsh <<< {{chsh_password}}"
+      tags: file 
+    - name: 安装autojump 
+      shell: "{{ home_tool_dir }}/autojump/install.py"
+      args:
+        chdir: "{{ home_tool_dir }}/autojump"
+        executable: /bin/zsh
+      tags: install
+

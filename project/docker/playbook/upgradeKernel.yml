@@ -1,0 +1,52 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  vars:
+    kernel_version: 
+  tasks: 
+    - name: 获取内核升级安装包
+      get_url: 
+        url: http://xxx:yyy/kernel/kernel-{{ kernel_version }}.tar.gz
+        dest: /tmp/kernel-{{ kernel_version }}.tar.gz
+      tags: source
+
+    - name: 解压缩内核升级安装包
+      unarchive:
+        src: /tmp/kernel-{{ kernel_version }}.tar.gz
+        dest: /tmp
+        remote_src: true
+      tags: source
+
+    - name: 安装kernel-rpm
+      yum:
+        name: /tmp/kernel-{{ kernel_version }}/kernel-{{ kernel_version }}.rpm
+        state: present
+      tags: install
+    - name: 安装kernel-headers-rpm
+      yum:
+        name: /tmp/kernel-{{ kernel_version }}/kernel-headers-{{ kernel_version }}.rpm
+        state: present
+      tags: install
+    - name: 安装kernel-devel-rpm
+      yum:
+        name: /tmp/kernel-{{ kernel_version }}/kernel-devel-{{ kernel_version }}.rpm
+        state: present
+      tags: install
+    - name: 复制ttm的modules至sysconfig下
+      copy:
+        src: ../files/ttm.modules
+        dest: /etc/sysconfig/modules/
+      tags: install
+
+    - name: 设置selinux为permissive模式
+      selinux:
+        policy: targeted
+        state: permissive
+      tags: reboot 
+    - name: 重启机器
+      command: reboot
+      tags: reboot 
+  become: yes
+  gather_facts: yes
+

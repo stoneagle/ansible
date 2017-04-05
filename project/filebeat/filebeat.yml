@@ -1,0 +1,19 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - inventory/vars/{{ group }}
+  remote_user: search
+  roles:
+    - filebeat
+  tasks:
+    - name: Filebeat配置
+      template:
+        src: "templates/{{ filebeat_template }}"
+        dest: "{{ filebeat_home }}/filebeat.yml"
+        owner: "{{ filebeat_user }}" 
+        group: "{{ filebeat_group }}" 
+        mode: 0644 
+        force: yes
+      tags: configuration
+  become: no
+  gather_facts: yes

@@ -1,0 +1,45 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    - name: 确定flannel是最新版本
+      yum: 
+        name: flannel 
+        state: latest
+    - name: 复制flannel相关证书
+      copy: 
+        src: ../files/certs 
+        dest: /etc/flannel/
+
+    - name: 获取私钥列表，并注册为变量
+      find: 
+        paths: "/etc/flannel/certs" 
+        patterns: "*key*"
+      register: private_keys
+
+    - name: 更新私钥文件权限
+      file: 
+        path: "{{ item.path }}" 
+        mode: 0600
+      with_items: "{{ private_keys.files }}"
+
+    - name: 根据模板生成系统配置
+      template: 
+        src: ../templates/flanneld.j2 
+        dest: /etc/sysconfig/flanneld
+
+#   - firewalld: permanent=yes zone=public port=8472/udp state=enabled immediate=yes
+#   - firewalld: permanent=yes zone=trusted source='172.17.0.0/16' state=enabled immediate=yes
+
+    # etcd: /qihoo.cloud/network/config
+    - name: 启用flanneld
+      service: 
+        name: flanneld 
+        enabled: yes
+    - name: 启动flanneld
+      service: 
+        name: flanneld 
+        state: started
+  become: yes
+  gather_facts: yes

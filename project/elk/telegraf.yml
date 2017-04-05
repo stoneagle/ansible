@@ -1,0 +1,26 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - inventory/vars/{{ group }}
+    - inventory/vars/telegraf.vault
+  roles:
+    - telegraf
+  tasks:
+    - name: 生成telegraf的系统服务
+      template:
+        src: "templates/telegraf.service.j2"
+        dest: "/etc/systemd/system/telegraf.service"
+    - name: 生成telegraf的系统配置
+      template:
+        src: "templates/telegraf.conf.j2"
+        dest: "{{ telegraf_config }}"
+        owner={{ telegraf_user }} group={{ telegraf_group }}
+    - name: 重启系统服务
+      command: systemctl daemon-reload
+    - name: 重启telegraf服务
+      service: 
+        name: telegraf 
+        state: restarted
+        enabled: yes
+  become: yes
+  gather_facts: yes

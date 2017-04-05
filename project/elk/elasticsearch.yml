@@ -1,0 +1,8 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - inventory/vars/{{ group }}
+  roles:
+    - elasticsearch
+  become: yes
+  gather_facts: yes

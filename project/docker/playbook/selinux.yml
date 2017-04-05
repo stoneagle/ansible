@@ -1,0 +1,59 @@
+---
+- hosts: "{{ group }}"
+  tasks: 
+    - name: 挂载的网络卷启用 
+      command: setsebool -P virt_sandbox_use_fusefs on
+
+    - name: 挂载的本地文件certs必须符合类型
+      command: chcon -R -t svirt_sandbox_file_t /data/usr/certs
+
+    - name: 挂载的本地文件kubeconfig必须符合类型
+      command: chcon -R -t svirt_sandbox_file_t /data/usr/kubernetes/kubeconfig
+
+    - name: 挂载的本地文件filebeat必须符合类型
+      command: chcon -R -t svirt_sandbox_file_t /data/usr/filebeat
+
+    # - name: filebeat从k8s目录采集日志
+    #   command: semanage fcontext -a -t docker_var_lib_t "/var/log/containers(/.*)?"
+
+    # - name: 恢复文件的安全上下文
+    #   command: restorecon -R /var/log/containers
+
+    - name: 自定义策略目录初始化
+      file:
+        path: "/data/usr/policy"
+        state: directory
+    - name: k8s策略复制
+      copy:
+        src: ../files/policy/k8s-policy.te
+        dest: /data/usr/policy
+    - name: 策略module检查
+      command: checkmodule -M -m -o k8s-policy.mod k8s-policy.te chdir=/data/usr/policy
+    - name: semodule_package配置
+      command: semodule_package -o k8s-policy.pp -m k8s-policy.mod chdir=/data/usr/policy
+    - name: semodule配置
+      command: semodule -i k8s-policy.pp chdir=/data/usr/policy
+    - name: se管理 
+      command: semanage fcontext -a -t docker_exec_t /usr/bin/dockerd
+    
+    - name: selinux状态更改
+      selinux:
+        policy: targeted
+        state: permissive
+
+    - name: flanneld重启
+      service:
+        name: flanneld
+        state: restarted
+    - name: docker重启
+      service:
+        name: docker 
+        state: restarted
+    - name: kubelet重启
+      service:
+        name: kubelet 
+        state: restarted
+    - name:  kube-proxy重启
+      service:
+        name: kube-proxy 
+        state: restarted

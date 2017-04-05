@@ -1,0 +1,16 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - inventory/vars/{{ group }}
+  remote_user: search
+  tasks:
+    # - name: 删除临时文件夹的filebeat
+    #   command: rm /tmp/filebeat
+    - name: 删除临时文件夹的filebeat
+      command: "{{ filebeat_home }}/filebeat.sh {{ cmd }}"
+    # - name: 中止filebeat进程
+    #   command: pkill -f {{ filebeat_home }}/filebeat/filebeat
+    # - name: 删除filebeat的pid 
+    #   command: rm /tmp/filebeat.pid
+  become: no
+  gather_facts: no

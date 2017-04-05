@@ -1,0 +1,32 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+#   - service: name=firewalld enabled=yes
+#   - service: name=firewalld state=started
+
+#   # DEV
+# # - firewalld: permanent=yes zone=trusted source='xxx/22' state=enabled
+
+#   # Cluster
+#   - firewalld: permanent=yes zone=trusted source='{{ item }}' state=enabled
+#     with_items: "{{ cluster_ips }}"
+
+    # Kubernetes
+    - firewalld: permanent=yes zone=trusted source='{{ item }}' state=enabled
+      with_items: "{{ kubernetes_ips }}"
+
+#   # CloudOPS
+#   - firewalld: permanent=yes zone=trusted source='{{ item }}' state=enabled
+#     with_items: "{{ cloudops_ips }}"
+
+#   # Public Service
+# # - firewalld: permanent=yes zone=public port=8000-10000/tcp state=enabled
+
+    # GCS - Comment
+#   - firewalld: permanent=yes zone=public rich_rule='rule family="ipv4" source address="xxx/32" port protocol="tcp" port="9201" accept' state=enabled
+
+    - command: firewall-cmd --reload
+  become: yes
+  gather_facts: no

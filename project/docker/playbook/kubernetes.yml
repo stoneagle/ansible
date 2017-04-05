@@ -1,0 +1,135 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - "../inventory/vars/{{ group }}"
+  tasks:
+    - name: 初始化k8s根目录
+      file: 
+        path: "{{ kube_home }}" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}" 
+        state: directory
+      tags: init 
+    - name: 初始化k8s的manifests目录
+      file: 
+        path: "{{ kube_home }}/manifests" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}" 
+        state: directory
+      tags: init 
+    - name: 初始化k8s的cfg目录
+      file: 
+        path: "{{ kube_home }}/cfg" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}" 
+        state: directory
+      tags: init 
+    - name: 解压缩k8s安装包
+      unarchive: 
+        src: ../releases/kubernetes-1.4.3.tar.gz 
+        creates: "{{ kube_home}}/kubernetes"
+        dest: "{{ kube_home }}" 
+      tags: init 
+    - name: 修改目录名称
+      command: "mv {{ kube_home }}/kubernetes {{ kube_home }}/kubernetes-1.4.3"
+      tags: init 
+    - name: 创建k8s目录的软链
+      file: 
+        src: "{{ kube_home }}/kubernetes-1.4.3" 
+        path: "{{ kube_home }}/kubernetes" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}" 
+        state: link
+      tags: init 
+    - name: 创建k8s证书certs的软链
+      file: 
+        path: "{{ kube_home }}/certs" 
+        src: /data/usr/certs 
+        state: link 
+        force: true
+      tags: init 
+    - name: 根据模板生成k8s配置
+      template: 
+        src: ../templates/kubeconfig.j2 
+        dest: "{{ kube_home }}/kubeconfig" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}"
+      tags: client 
+    - name: 根据模板生成kubelet配置
+      template: 
+        src: ../templates/kubelet.j2 
+        dest: "{{ kube_home }}/cfg/kubelet" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}"
+      tags: client 
+    - name: 根据模板生成kubelet.service配置
+      template: 
+        src: ../templates/kubelet.service.j2 
+        dest: /etc/systemd/system/kubelet.service
+      tags: client 
+    - name: 根据模板生成kubeproxy配置
+      template: 
+        src: ../templates/kube-proxy.j2 
+        dest: "{{ kube_home }}/cfg//kube-proxy" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}"
+      tags: client 
+    - name: 根据模板生成kubeproxy,service配置
+      template: 
+        src: ../templates/kube-proxy.service.j2 
+        dest: /etc/systemd/system/kube-proxy.service
+      tags: client 
+    
+    # - name: 生成kube-apiserver的配置
+    #   template: 
+    #     src: "../templates/manifests/kube-apiserver.yaml.j2" 
+    #     dest: "{{ kube_home }}/manifests/kube-apiserver.yaml" 
+    #     owner: "{{ kube_user }}" 
+    #     group: "{{ kube_group }}"
+    #   tags: server
+    # - name: 生成kube-controller的配置
+    #   template: 
+    #     src: "../templates/manifests/kube-controller-manager.yaml.j2" 
+    #     dest: "{{ kube_home }}/manifests/kube-controller-manager.yaml" 
+    #     owner: "{{ kube_user }}" 
+    #     group: "{{ kube_group }}"
+    #   tags: server
+    # - name: 生成kube-scheduler的配置
+    #   template: 
+    #     src: "../templates/manifests/kube-scheduler.yaml.j2" 
+    #     dest: "{{ kube_home }}/manifests/kube-scheduler.yaml" 
+    #     owner: "{{ kube_user }}" 
+    #     group: "{{ kube_group }}"
+    #   tags: server
+    
+    - name: 重启系统服务
+      command: systemctl daemon-reload
+
+#   - firewalld: permanent=yes zone=public port=10250/tcp state=enabled immediate=yes
+#   - firewalld: permanent=yes zone=public port=30000-32767/tcp state=enabled immediate=yes
+    - name: 启用kubelet
+      service: 
+        name: kubelet 
+        enabled: yes
+    - name: 启动kubelet
+      service: 
+        name: kubelet 
+        state: started
+    - name: 启用kube-proxy
+      service: 
+        name: kube-proxy 
+        enabled: yes
+    - name: 启动kube-proxy
+      service: 
+        name: kube-proxy 
+        state: started
+
+    - name: 创建kubectl的软链
+      file: 
+        src: "{{ kube_home }}/kubernetes/server/bin/kubectl" 
+        path: "/usr/bin/kubectl" 
+        owner: "root" 
+        group: "root" 
+        state: link
+  become: yes
+  gather_facts: yes

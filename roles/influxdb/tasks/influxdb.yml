@@ -1,0 +1,54 @@
+---
+# 安装服务
+- name: 创建根目录
+  file: 
+    path: "{{ influxdb_home }}"
+    state: directory 
+    owner: "{{ influxdb_user }}" 
+    group: "{{ influxdb_group }}" 
+    mode: 0755
+- name: 创建数据目录 
+  file: 
+    path: "{{ influxdb_data }}"
+    state: directory 
+    owner: "{{ influxdb_user }}" 
+    group: "{{ influxdb_group }}" 
+    mode: 0755
+
+- name: 创建版本目录
+  file: 
+    path: "{{ influxdb_home }}/{{ influxdb_release }}"
+    state: directory 
+    owner: "{{ influxdb_user }}" 
+    group: "{{ influxdb_group }}" 
+    mode: 0755
+
+- name: 解压缩influxdb的安装包 
+  unarchive:
+    src: "releases/{{ influxdb_release }}_linux_amd64.tar.gz"
+    dest: "{{ influxdb_home }}"
+
+- name: 更改influxdb目录的权限
+  file:
+    path: "{{ influxdb_home }}/{{ influxdb_release }}"
+    owner: "{{ influxdb_user }}" 
+    group: "{{ influxdb_group }}" 
+    recurse: yes
+
+- name: 生成influxdb目录的软链
+  file:
+    path: "{{ influxdb_home }}/influxdb"
+    src: "{{ influxdb_home }}/{{ influxdb_release }}"
+    owner: "{{ influxdb_user }}" 
+    group: "{{ influxdb_group }}" 
+    state: link
+
+# 同步配置
+- name: 生成influxdb系统服务
+  template:
+    src: "influxdb.service.j2"
+    dest: "/etc/systemd/system/{{ influxdb_systemd['name'] }}.service"
+
+- name: 重启系统服务 
+  command: systemctl daemon-reload
+

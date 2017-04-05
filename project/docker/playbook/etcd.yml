@@ -1,0 +1,28 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  vars:
+    etcd_cert: /data/usr/etcd/certs/{{ ansible_nodename }}.pem
+    etcd_key: /data/usr/etcd/certs/{{ ansible_nodename }}-key.pem
+    etcd_peer_cert: /data/usr/etcd/certs/{{ ansible_nodename }}.pem
+    etcd_peer_key: /data/usr/etcd/certs/{{ ansible_nodename }}-key.pem
+  roles:
+    - etcd
+  tasks:
+    - name: 删除原有certs
+      file: 
+        path: "{{ etcd_home }}/certs"
+        state: absent
+    - name: 生成新的certs软链
+      file: 
+        path: "{{ etcd_home }}/certs"
+        src: /data/usr/certs 
+        state: link 
+        force: true
+    - name: 创建etcd的软链
+    - name: 创建etcdctl的软链
+    - name: 生成flannel需要的docker网段
+  become: yes
+  gather_facts: yes
+

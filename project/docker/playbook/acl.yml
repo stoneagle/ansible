@@ -1,0 +1,13 @@
+---
+- hosts: "{{ group }}"
+  serial: 1
+  tasks:
+    - name: 根据模板生成acl内容
+      template:
+        src: "../templates/direct.xml.j2"
+        dest: "/etc/firewalld/direct.xml" 
+    - name: 重启firewall
+      command: firewall-cmd --reload
+  become: yes
+  gather_facts: yes
+

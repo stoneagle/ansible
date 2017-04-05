@@ -1,0 +1,13 @@
+---
+
+- name: start-filebeat
+  command: "{{ filebeat_home }}/filebeat.sh start"
+
+- name: stop-filebeat
+  command: "{{ filebeat_home }}/filebeat.sh stop"
+
+- name: restart-filebeat
+  command: "{{ filebeat_home }}/filebeat.sh restart"
+
+- name: test-filebeat
+  command: "{{ filebeat_home }}/filebeat.sh test"

@@ -1,0 +1,88 @@
+---
+- hosts: "{{ group }}" 
+  tasks:
+    - name: 安装常用软件，系统工具
+      yum: 
+        name: ack,htop,sysstat,mlocate,bash-completion,vim 
+        state: latest
+
+    - name: 用tuned-adm调优服务器配置
+      command: tuned-adm profile throughput-performance
+
+    # - name: 安装时间同步
+    #   yum: 
+    #     name: ntp 
+    #     state: latest
+    # - name: 启用ntpd时间同步
+    #   service: 
+    #     name: ntpd 
+    #     enabled: yes
+    # - name: 启动ntpd时间同步
+    #   service: 
+    #     name: ntpd 
+    #     state: started
+
+    - name: 启用numad，动态提高numa的资源分配与管理
+      yum: 
+        name: numad 
+        state: latest
+    - name: 启用numad
+      service: 
+        name: numad 
+        enabled: yes
+    - name: 启动numad
+      service: 
+        name: numad 
+        state: started
+
+    - name: 启用selinux
+      selinux:
+        policy: targeted
+        state: enforcing
+
+    - name: 检查linux系统配置文件中，网桥arptables的设定 
+      lineinfile:
+        dest: /etc/sysctl.d/99-sysctl.conf
+        state: present
+        line: "net.bridge.bridge-nf-call-arptables = 1"
+    - name: 检查linux系统配置文件中，网桥ip6tables的设定 
+      lineinfile:
+        dest: /etc/sysctl.d/99-sysctl.conf
+        state: present
+        line: "net.bridge.bridge-nf-call-ip6tables = 1"
+    - name: 检查linux系统配置文件中，网桥iptables的设定 
+      lineinfile:
+        dest: /etc/sysctl.d/99-sysctl.conf
+        state: present
+        line: "net.bridge.bridge-nf-call-iptables = 1"
+
+    - name: 更新yum工具至最新版本
+      yum: 
+        name: '*'
+        state: latest 
+        exclude: kernel*,centos-release*
+
+    - name: 初始化usr目录
+      file: 
+        path: "/data/usr" 
+        state: directory
+    - name: 初始化var目录
+      file: 
+        path: "/data/var" 
+        state: directory
+    - name: 初始化var/lib目录
+      file: 
+        path: "/data/var/lib" 
+        state: directory
+    - name: 初始化var/run目录
+      file: 
+        path: "/data/var/run" 
+        state: directory
+        mode: 777
+    - name: 初始化log目录
+      file: 
+        path: "/data/log" 
+        state: directory
+        mode: 777
+  become: yes
+  gather_facts: no

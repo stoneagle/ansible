@@ -1,0 +1,88 @@
+################### Filebeat Configuration Example #########################
+
+############################# Filebeat ######################################
+filebeat:
+  # List of prospectors to fetch data.
+  prospectors:
+    -
+      paths:
+        - /XXX/access.log
+      encoding: plain
+      input_type: log
+      fields:
+        es_index: xxx 
+      document_type: nginx-access
+      scan_frequency: 10s
+      # tail_files: true
+
+    -
+      paths:
+        - /YYY/error.log
+      encoding: plain
+      input_type: log
+      fields:
+        es_index: yyy 
+      document_type: nginx-error
+      multiline:
+          pattern: ^20
+          negate: true
+          match: after
+      scan_frequency: 10s
+      # tail_files: true
+
+    -
+      paths:
+        - /home/s/logs/php-fpm.log
+      encoding: plain
+      input_type: log
+      fields:
+        es_index: zzz 
+      document_type: php-fpm
+      scan_frequency: 60s
+
+    -
+      paths:
+        - /home/s/logs/php.log
+      encoding: plain
+      input_type: log
+      fields:
+        es_index: zzz 
+      document_type: php-log
+      multiline:
+          pattern: ^\[
+          negate: true
+          match: after
+      scan_frequency: 30s
+
+  # General filebeat configuration options
+  registry_file: /tmp/filebeat
+
+############################# Libbeat Config ##################################
+# Base config file used by all other beats for using libbeat features
+
+############################# Output ##########################################
+
+# Configure what outputs to use when sending the data collected by the beat.
+# Multiple outputs may be used.
+output:
+  ### Logstash as output
+  logstash:
+    # The Logstash hosts
+    hosts: ["{{ filebeat_logstash|join('","') }}"]
+    worker: 1
+    compression_level: 3
+    loadbalance: true
+
+  # console:
+    #pretty
+
+############################# Shipper #########################################
+
+shipper:
+  tags: ["{{ filebeat_tags|join('","') }}"]
+
+
+############################# Logging #########################################
+
+logging:
+

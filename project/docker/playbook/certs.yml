@@ -1,0 +1,54 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  become: yes
+  tasks: 
+    - name: 初始化certs目录
+      file:
+        path: "/data/usr/certs"
+        state: directory
+    - name: 复制ca.pem
+      copy:
+        src: "../files/certs/cfssl/ca.pem"
+        dest: "/data/usr/certs/"
+        owner: "{{ certs_user }}" 
+        group: "{{ certs_group }}" 
+        mode: "644"
+    - name: 复制kube-service-account.pem
+      copy:
+        src: "../files/certs/cfssl/kube-service-account.pem"
+        dest: "/data/usr/certs/"
+        owner: "{{ certs_user }}" 
+        group: "{{ certs_group }}" 
+        mode: "644"
+    - name: 复制kube-service-account-key.pem
+      copy:
+        src: "../files/certs/cfssl/kube-service-account-key.pem"
+        dest: "/data/usr/certs/"
+        owner: "{{ certs_user }}" 
+        group: "{{ certs_group }}" 
+        mode: "600"
+    - name: 复制docker_certs中的csr
+      copy:
+        src: "../files/certs/cfssl/docker_certs/{{ ansible_nodename }}.csr"
+        dest: "/data/usr/certs/"
+        owner: "{{ certs_user }}" 
+        group: "{{ certs_group }}" 
+        mode: "644"
+    - name: 复制docker_certs中的pem
+      copy:
+        src: "../files/certs/cfssl/docker_certs/{{ ansible_nodename }}.pem"
+        dest: "/data/usr/certs/"
+        owner: "{{ certs_user }}" 
+        group: "{{ certs_group }}" 
+        mode: "644"
+    - name: 复制docker_certs中的key.pem
+      copy:
+        src: "../files/certs/cfssl/docker_certs/{{ ansible_nodename }}-key.pem"
+        dest: "/data/usr/certs/"
+        owner: "{{ certs_user }}" 
+        group: "{{ certs_group }}" 
+        mode: "600"
+  gather_facts: yes
+

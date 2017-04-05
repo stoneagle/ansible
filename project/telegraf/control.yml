@@ -1,0 +1,14 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - inventory/vars/{{ group }}
+  remote_user: search
+  tasks:
+    - name: 执行telegraf脚本
+      command: "{{ telegraf_home }}/telegraf.sh {{ cmd }}"
+    # - name: 杀死telegraf进程
+    #   command: pkill -f {{ telegraf_home }}/telegraf
+    # - name: 删除telegraf的pid
+    #   command: rm /home/s/var/proc/telegraf.pid
+  become: no
+  gather_facts: no

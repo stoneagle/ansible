@@ -1,0 +1,53 @@
+################### Filebeat Configuration Example #########################
+
+############################# Filebeat ######################################
+filebeat:
+  # List of prospectors to fetch data.
+  prospectors:
+    -
+      paths:
+        - /var/log/containers/*
+      encoding: plain
+      input_type: log
+      document_type: k8s-log
+      fields:
+        cluster: {{ filebeat_cluster }}
+        hostname: {{ ansible_nodename }}
+      fields_under_root: true
+      scan_frequency: 5s
+      max_bytes: 1048576        # 1M
+      multiline:
+        pattern: '^(\t|[\ ]{4})'
+        negate: false
+        match: after
+
+  # General filebeat configuration options
+  registry_file: /data/usr/filebeat/kube-filebeat.registry
+
+############################# Libbeat Config ##################################
+# Base config file used by all other beats for using libbeat features
+
+############################# Output ##########################################
+
+# Configure what outputs to use when sending the data collected by the beat.
+# Multiple outputs may be used.
+output:
+  ### Logstash as output
+  logstash:
+    # The Logstash hosts
+    hosts: ["{{ filebeat_logstash|join('","') }}"]
+    worker: 1
+    compression_level: 3
+    loadbalance: true
+
+  # console:
+    #pretty
+
+############################# Shipper #########################################
+
+shipper:
+
+
+############################# Logging #########################################
+
+logging:

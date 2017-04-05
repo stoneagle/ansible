@@ -1,0 +1,61 @@
+---
+- hosts: "{{ group }}"
+  serial: 1
+  tasks:
+    - name: 启用firewall
+      service:
+        name: firewalld
+        enabled: yes
+    - name: 启动firewall
+      service:
+        name: firewalld
+        state: started
+
+    - name: 配置公共服务http
+      firewalld: 
+        permanent: yes
+        zone: public
+        service: http
+        state: enabled
+    - name: 配置公共服务https
+      firewalld: 
+        permanent: yes
+        zone: public
+        service: https
+        state: enabled
+
+    - name: 配置etcd
+      firewalld: 
+        permanent: yes
+        zone: public
+        port: 2379-2380/tcp
+        state: enabled
+
+    - name: 配置gfs
+      firewalld: 
+        permanent: yes
+        zone: public
+        port: 8472/udp
+        state: enabled
+
+    # - name: 配置cluster
+    #   firewalld: 
+    #     permanent: yes
+    #     zone: trusted 
+    #     source: "172.17.0.0/16"
+    #     state: enabled
+    
+    - name: 配置cluster
+      firewalld: 
+        permanent: yes
+        immediate: yes
+        zone: trusted 
+        source: "{{ item }}"
+        state: enabled
+      with_items: "{{ firewalld.trusted_sources }}"
+
+    - name: 重启firewall
+      command: firewall-cmd --reload
+  become: yes
+  gather_facts: no
+
