@@ -1,9 +1,15 @@
+# docker 
+docker_registry: cloud
+kernel_version: 3.10.0-327.36.3.el7.v3.4.1.x86_64
+kernel_download_url: xxx:8360
+
 # certs
 certs_user: search
 certs_group: search
 
 # Flannel
 flannel_etcd: https://xxx:2379,https://yyy:2379
+etcd_prefix: /cloud/network
 
 # Etcd
 etcd_release: etcd-v2.3.7-linux-amd64
@@ -25,7 +31,7 @@ etcd_config:
     data-dir: /data/var/lib/etcd/etcd-2379
     peer-port: 2380
     client-port: 2379
-    token: qssweb-etcd-zzbc
+    token: etcd-zzbc
     cluster: "XXX=https://xxx:2380,\
               YYY=https://yyy:2380"
 
@@ -34,7 +40,7 @@ kube_home: /data/usr/kubernetes
 kube_user: search
 kube_group: search
 
-kube_cluster_name: qssweb-kube-zzbc
+kube_cluster_name: kube-zzbc
 kube_etcd_servers: https://xxx:2379,https://yyy:2379
 kube_api_servers: https://xxx
 kube_service_ip_range: 10.254.0.0/16

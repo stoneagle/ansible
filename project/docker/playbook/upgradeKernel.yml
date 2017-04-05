@@ -3,11 +3,11 @@
   vars_files:
     - ../inventory/vars/{{ group }}
   vars:
-    kernel_version: 
+    # kernel_version: 
   tasks: 
     - name: 获取内核升级安装包
       get_url: 
-        url: http://xxx:yyy/kernel/kernel-{{ kernel_version }}.tar.gz
+        url: "http://{{ kernel_download_url }}/kernel/kernel-{{ kernel_version }}.tar.gz"
         dest: /tmp/kernel-{{ kernel_version }}.tar.gz
       tags: source
 

@@ -21,4 +21,4 @@ KUBELET_API_SERVER="--api-servers={{ kube_api_servers }}"
 KUBE_ALLOW_PRIV="--allow-privileged=false"
 
 # Add your own!
-KUBELET_ARGS="--config={{ kube_home }}/manifests --kubeconfig={{ kube_home }}/kubeconfig --cluster-dns={{ kube_dns_server_ip }} --image-gc-high-threshold=60 --image-gc-low-threshold=40 --pod-infra-container-image=cloud/rhel7/pod-infrastructure --tls-cert-file={{ kube_home }}/certs/{{ ansible_nodename }}.pem --tls-private-key-file={{ kube_home }}/certs/{{ ansible_nodename }}-key.pem"
+KUBELET_ARGS="--config={{ kube_home }}/manifests --kubeconfig={{ kube_home }}/kubeconfig --cluster-dns={{ kube_dns_server_ip }} --image-gc-high-threshold=60 --image-gc-low-threshold=40 --pod-infra-container-image={{ docker_registry }}/rhel7/pod-infrastructure --tls-cert-file={{ kube_home }}/certs/{{ ansible_nodename }}.pem --tls-private-key-file={{ kube_home }}/certs/{{ ansible_nodename }}-key.pem"
