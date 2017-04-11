@@ -20,9 +20,16 @@
         src: /data/usr/certs 
         state: link 
         force: true
-    - name: 创建etcd的软链
     - name: 创建etcdctl的软链
-    - name: 生成flannel需要的docker网段
+      file:
+        path: "/usr/bin/etcdctl"
+        src: "{{ etcd_home }}/etcd/etcdctl"
+        owner: "root" 
+        group: "root" 
+        state: link
+    # 双引号转义问题
+    # - name: 生成flannel需要的docker网段
+    #   command: "etcdctl --ca-file {{ etcd_home }}/certs/ca.pem --cert-file {{ etcd_cert }} --key-file {{ etcd_key }} --endpoint '{{ etcd_scheme }}://{{ ansible_eth0.ipv4.address }}:{{ etcd_config['client-port'] }}' set {{ etcd_prefix }}/config '{{ flannel_etcd_config }}' "
   become: yes
   gather_facts: yes
 

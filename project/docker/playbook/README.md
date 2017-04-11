@@ -32,7 +32,7 @@
     * 依赖certs文件，生成相应的软链
     * 注意证书的权限，需要与etcd目录，以及系统服务下的执行者一致
     * 需要注意，如果etcd cluster之前启动过，并且member有变动，需要删除data-dir
-    * cluster启动时，第一个是new，后续的是exist
+    * cluster启动时，如果是初次搭建集群，设定为new;如果是加入某个已存在的cluster，则设定为existing
     * 再调用etcdctl时，需要注意ssl验证
     ```
         ./etcd/etcdctl --ca-file ./certs/ca.pem --cert-file ./certs/xxx.pem --key-file ./certs/xxx-key.pem --endpoint "https://XXX:2379" cluster-health
@@ -57,9 +57,9 @@
     * master依赖的三个组件，将相关yaml配置放在manifests目录下，启动时会根据hyper容器自动启动
     * kubectl执行https命令 ./kubectl --server=https://XXX --certificate-authority=/data/usr/kubernetes/certs/ca.pem --client-certificate=/data/usr/kubernetes/certs/xxx.pem --client-key=/data/usr/kubernetes/certs/xxx-key.pem get nodes
 1. filebeat.yml
-    * 配置filebeat的目录(需要配置filebeat_logstash)
+    * 配置filebeat的目录(需要配置filebeat_logstash，未安装)
 1. skydns.yml
-    * 安装skydns
+    * 安装skydns(未安装)
 
 ## 第五阶段，网络、SELINUX等规则配置
 1. acl.yml 

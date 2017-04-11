@@ -9,43 +9,89 @@
       yum: 
         name: glusterfs-server,glusterfs 
         state: latest
-    #   - service: name=glusterd enabled=yes
-    #   - service: name=glusterd state=started
+    # - name: 启用glusterd
+    #   service: name=glusterd enabled=yes
+    # - name: 启动glusterd
+    #   service: name=glusterd state=started
 
     # sudo gluster peer probe IP
     # sudo gluster volume create fs_stripe stripe 2 transport tcp 172.17.37.0:/gfs/brick0/export 172.17.62.0:/gfs/brick0/export
-    #
     # sudo gluster volume create fs_replica replica 2 transport tcp 172.17.37.0:/gfs/brick1/export 172.17.62.0:/gfs/brick1/export
-    #
     # sudo gluster volume create test-volume disperse 3 redundancy 1 server{1..6}:/bricks/test-volume
     # sudo gluster volume start XXX
     # sudo mount -t glusterfs IP:/XXX /mnt/gfs
-    #
-    #   - file: state=directory path=/mnt/gfs
-    #   - mount: name=/mnt/gfs fstype=glusterfs src={{ ansible_eth0.ipv4.address }}:/fs_replica opts=noauto,_netdev state=mounted
+    
+    # - name: 创建gfs的目录
+    #   file: 
+    #     state: directory 
+    #     path: /mnt/gfs
+    # - name: 挂载gfs
+    #   mount: 
+    #     name: /mnt/gfs 
+    #     fstype: glusterfs 
+    #     src: "{{ ansible_eth0.ipv4.address }}:/fs_replica" 
+    #     opts: noauto,_netdev 
+    #     state: mounted
+    # - name: 卸载gfs_disperse
+    #   command: umount /mnt/gfs_disperse
+    # - name: 挂载fs_disperse
+    #   mount: name=/mnt/gfs_disperse 
+    #   fstype: glusterfs 
+    #   src: "{{ ansible_eth0.ipv4.address }}:/fs_disperse" 
+    #   opts: noauto,_netdev 
+    #   state: absent
+    # - name: 删除挂载gfs_disperse的命令
+    #   lineinfile: 
+    #     dest: /etc/rc.local 
+    #     state: absent 
+    #     line: "/bin/mount /mnt/gfs_disperse &"
 
-    #   - command: umount /mnt/gfs_disperse
-    #   - mount: name=/mnt/gfs_disperse fstype=glusterfs src={{ ansible_eth0.ipv4.address }}:/fs_disperse opts=noauto,_netdev state=absent
-    #   - lineinfile: dest=/etc/rc.local state=absent line="/bin/mount /mnt/gfs_disperse &"
+    # - name: 卸载gfs_stripe
+    #   command: umount /mnt/gfs_stripe
+    # - name: 挂载gfs_stripe
+    #   mount: 
+    #     name: /mnt/gfs_stripe 
+    #     fstype: glusterfs 
+    #     src: "{{ ansible_eth0.ipv4.address }}:/fs_stripe" 
+    #     opts: noauto,_netdev 
+    #     state: absent
+    # - name: 删除挂载gfs_stripe的命令
+    #   lineinfile: 
+    #     dest: /etc/rc.local 
+    #     state: absent 
+    #     line: "/bin/mount /mnt/gfs_stripe &"
 
-    #   - command: umount /mnt/gfs_stripe
-    #   - mount: name=/mnt/gfs_stripe fstype=glusterfs src={{ ansible_eth0.ipv4.address }}:/fs_stripe opts=noauto,_netdev state=absent
-    #   - lineinfile: dest=/etc/rc.local state=absent line="/bin/mount /mnt/gfs_stripe &"
+    # - name: 创建逻辑卷,glusterfs的thinpool，01-05
+    #   command: lvcreate -V 100g --thin VolGroup00/ThinPool01 -n ThinVol0{{item}}
+    #   with_sequence: start=1 end=5
+    # - name: 更改gfs的thinpool的fstype
+    #   filesystem: fstype=xfs dev=/dev/VolGroup00/ThinVol0{{item}}
+    #   with_sequence: start=1 end=5
+    # - name: 挂载gfs的thinpool作为brick 
+    #   mount: 
+    #     name: "/gfs/brick0{{item}}" 
+    #     src: "/dev/VolGroup00/ThinVol0{{item}}" 
+    #     fstype: xfs 
+    #     opts: "defaults" 
+    #     state: mounted
+    #   with_sequence: start=1 end=5
 
-        # Thinly-Provisioned Logical Volumes for GlusterFS
-    #   - command: lvcreate -V 100g --thin VolGroup00/ThinPool01 -n ThinVol0{{item}}
-    #     with_sequence: start=1 end=5
-    #   - filesystem: fstype=xfs dev=/dev/VolGroup00/ThinVol0{{item}}
-    #     with_sequence: start=1 end=5
-    #   - mount: name=/gfs/brick0{{item}} src=/dev/VolGroup00/ThinVol0{{item}} fstype=xfs opts="defaults" state=mounted
-    #     with_sequence: start=1 end=5
-
-    #   - command: lvcreate -V 300g --thin VolGroup00/ThinPool01 -n ThinVol0{{item}}
-    #     with_sequence: start=6 end=6
-    #   - filesystem: fstype=xfs dev=/dev/VolGroup00/ThinVol0{{item}}
-    #     with_sequence: start=6 end=6
-    #   - mount: name=/gfs/brick0{{item}} src=/dev/VolGroup00/ThinVol0{{item}} fstype=xfs opts="defaults" state=mounted
-    #     with_sequence: start=6 end=6
+    # - name: 挂载第6个thinpool，300g
+    #   command: lvcreate -V 300g --thin VolGroup00/ThinPool01 -n ThinVol0{{item}}
+    #   with_sequence: start=6 end=6
+    # - name: 更改gfs的thinpool的fstype
+    # - filesystem: 
+    #     fstype: xfs 
+    #     dev: "/dev/VolGroup00/ThinVol0{{item}}"
+    #   with_sequence: start=6 end=6
+    # - name: 挂载gfs的thinpool作为brick 
+    #   mount: 
+    #     name: "/gfs/brick0{{item}}" 
+    #     src: "/dev/VolGroup00/ThinVol0{{item}}" 
+    #     fstype: xfs 
+    #     opts: "defaults" 
+    #     state: mounted
+    #   with_sequence: start=6 end=6
 
     # https://gluster.readthedocs.io/en/latest/Administrator%20Guide/Setting%20Up%20Volumes/
     # sudo gluster volume create disperse_vol_01 disperse 6 redundancy 2 server{1..6}:/gfs/brick01/export

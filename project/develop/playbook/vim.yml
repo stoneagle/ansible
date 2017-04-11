@@ -1,0 +1,87 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+   # - name: 安装vimx 
+   #    become: yes
+   #    become_user: root 
+   #    become_method: sudo
+   #    yum:
+   #      name: vim-X11.x86_64 
+   #      state: latest 
+   #    tags: install 
+   #  - name: 安装silver_searcher(支持vim插件ag)
+   #    become: yes
+   #    become_user: root 
+   #    become_method: sudo
+   #    yum:
+   #      name: the_silver_searcher
+   #      state: latest 
+   #    tags: install 
+   #  - name: 安装xsel，作为vim的复制剪贴板 
+   #    become: yes
+   #    become_user: root 
+   #    become_method: sudo
+   #    yum:
+   #      name: xsel 
+   #      state: latest 
+   #    tags: install 
+   #  - name: 从github获取personal_conf 
+   #    git:
+   #      repo: "{{ tool_git_href }}" 
+   #      dest: "{{ home_tool_dir }}" 
+   #      clone: yes 
+   #      update: yes
+   #    tags: github
+   #  - name: 从github获取vundle 
+   #    git:
+   #      repo: "{{ vundle_git_href }}" 
+   #      dest: "{{ home_dir }}/.vim/bundle/Vundle.vim" 
+   #      clone: yes 
+   #      update: yes
+   #    tags: github
+   #  - name: 检查vundle目录是否存在 
+   #    file:
+   #      path: "{{ home_vim_dir }}/bundle/Vundle.vim"
+   #      state: directory
+   #    tags: filelink 
+   #  - name: 生成个人配置的配色软链
+   #    file:
+   #      src: "{{ home_tool_dir }}/colors"
+   #      dest: "{{ home_vim_dir }}/colors"
+   #      owner: "{{ owner }}"
+   #      group: "{{ owner_group }}" 
+   #      state: link 
+   #    tags: filelink 
+   #  - name: 生成个人配置的ftplugin软链
+   #    file:
+   #      src: "{{ home_tool_dir }}/ftplugin"
+   #      dest: "{{ home_vim_dir }}/ftplugin"
+   #      owner: "{{ owner }}"
+   #      group: "{{ owner_group }}" 
+   #      state: link 
+   #    tags: filelink 
+   #  - name: 生成个人配置的ultisnips软链
+   #    file:
+   #      src: "{{ home_tool_dir }}/UltiSnips"
+   #      dest: "{{ home_vim_dir }}/UltiSnips"
+   #      owner: "{{ owner }}" 
+   #      group: "{{ owner_group }}" 
+   #      state: link 
+   #    tags: filelink 
+   #  - name: 生成个人配置的.vimrc软链
+   #    file:
+   #      src: "{{ home_tool_dir }}/.vimrc"
+   #      dest: "{{ home_dir }}/.vimrc"
+   #      owner: "{{ owner }}" 
+   #      group: "{{ owner_group }}" 
+   #      state: link 
+   #    tags: filelink 
+    - name: 安装vim插件 
+      # shell: vim -E -s -c "source {{ home_dir }}/.vimrc" +PluginInstall +qall -V 
+      # 当插件较多时，这部分会比较慢
+      shell: vim +PluginInstall +qall 
+      ignore_errors: yes
+      tags: plugin 
+

@@ -1,11 +1,10 @@
 ---
-- hosts: corp
+- hosts: "{{ group }}"
   vars_files:
-    # - ../inventory/vars/"{{ group }}"
-    - ../inventory/vars/develop
+    - ../inventory/vars/{{ group }}
   remote_user: wuzhongyang
   tasks:
-    - name: 下载go的亚索包 
+    - name: 下载go的压缩包
       get_url: 
         url: https://storage.googleapis.com/golang/go1.8.linux-amd64.tar.gz
         dest: "{{ home_dir }}"

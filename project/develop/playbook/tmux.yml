@@ -1,8 +1,7 @@
 ---
-- hosts: corp
+- hosts: "{{ group }}"
   vars_files:
-    # - ../inventory/vars/"{{ group }}"
-    - ../inventory/vars/develop
+    - ../inventory/vars/{{ group }}
   remote_user: wuzhongyang
   tasks:
     - name: 安装tmux 
@@ -30,7 +29,7 @@
         src: "{{ home_tool_dir }}/.tmux.conf"
         dest: "{{ home_dir }}/.tmux.conf"
         owner: "{{ owner }}"
-        group: "{{ group }}" 
+        group: "{{ owner_group }}" 
         state: link 
       tags: file
 

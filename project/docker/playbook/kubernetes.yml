@@ -80,6 +80,7 @@
         dest: /etc/systemd/system/kube-proxy.service
       tags: client 
     
+    # 以下apiserver,controller,scheduler三个是服务端部署
     # - name: 生成kube-apiserver的配置
     #   template: 
     #     src: "../templates/manifests/kube-apiserver.yaml.j2" 
@@ -107,6 +108,7 @@
 
 #   - firewalld: permanent=yes zone=public port=10250/tcp state=enabled immediate=yes
 #   - firewalld: permanent=yes zone=public port=30000-32767/tcp state=enabled immediate=yes
+
     - name: 启用kubelet
       service: 
         name: kubelet 
@@ -131,5 +133,8 @@
         owner: "root" 
         group: "root" 
         state: link
+    # - name: 查看k8s节点node 
+    #   command: "kubectl --server=https://{{ ansible_eth0.ipv4.address }} --certificate-authority={{ kube_home }}/certs/ca.pem --client-certificate={{ kube_home }}/certs/{{ ansible_nodename }}.pem --client-key={{ kube_home }}/certs/{{ ansible_nodename }}-key.pem get nodes"
+
   become: yes
   gather_facts: yes

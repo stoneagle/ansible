@@ -6,6 +6,10 @@
   tasks:
     - name: 杀死svscanboot
       command: pkill -f "/bin/sh /usr/local/bin/svscanboot" 
+    - name: 删除hadoop.fuse.cron
+      command: rm /etc/cron.d/check.hadoop.fuse.cron
+    - name: 执行fuse的卸载脚本
+      command: /home/s/apps/fuse.hdp/umount.sh
     - name: 备份/da1 
       command:  cp -rp /da1 /da2
     - name: 卸载/da1

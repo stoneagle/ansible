@@ -8,7 +8,7 @@ ETCD_LISTEN_CLIENT_URLS='{{ etcd_scheme }}://{{ ansible_eth0.ipv4.address }}:{{ 
 ETCD_INITIAL_ADVERTISE_PEER_URLS='{{ etcd_peer_scheme }}://{{ ansible_eth0.ipv4.address }}:{{ etcd_config["peer-port"] }}'
 ETCD_INITIAL_CLUSTER_TOKEN='{{ etcd_config["token"] }}'
 ETCD_INITIAL_CLUSTER='{{ etcd_config["cluster"] }}'
-ETCD_INITIAL_CLUSTER_STATE='existing'
+ETCD_INITIAL_CLUSTER_STATE='new'
 ETCD_ADVERTISE_CLIENT_URLS='{{ etcd_scheme }}://{{ ansible_eth0.ipv4.address }}:{{ etcd_config["client-port"] }}'
 
 # Proxy

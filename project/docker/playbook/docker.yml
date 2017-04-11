@@ -1,5 +1,7 @@
 ---
 - hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
   tasks:
     - name: 复制docker的repo 
       copy: 
@@ -46,20 +48,24 @@
       file: 
         path: "/root/.docker" 
         state: directory
-    - name: 复制docker的配置json
-      copy: 
-        src: ../files/docker.config 
+    - name: 根据模板生成docker配置
+      template: 
+        src: ../templates/docker_config.j2 
         dest: /root/.docker/config.json
-
     - name: 拉取rhel7的镜像
       command: "docker pull {{ docker_registry }}/rhel7/pod-infrastructure"
     - name: 拉取hyperkube镜像 
       command: "docker pull {{ docker_registry }}/google_containers/hyperkube:v1.3.0"
 
-#   - service: name=kubelet enabled=yes
-#   - service: name=kubelet state=started
-#   - service: name=kube-proxy enabled=yes
-#   - service: name=kube-proxy state=started
+    # 安装docker-compose
+    - name: 复制docker-compose的执行工具(下载地址被墙，可去github查询) 
+      copy: 
+        src: ../releases/docker-compose-Linux-x86_64 
+        dest: /usr/bin/docker-compose
+    - name: 更新docker-compose命令权限
+      file: 
+        path: /usr/bin/docker-compose 
+        mode: 0755
 
   become: yes
   gather_facts: no

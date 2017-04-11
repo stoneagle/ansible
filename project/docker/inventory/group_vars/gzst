@@ -1,0 +1,6 @@
+firewalld:
+    trusted_sources: [
+    ]
+
+filebeat_cluster: gzst 
+filebeat_logstash: ["xxx","yyy"]
