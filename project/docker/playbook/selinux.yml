@@ -1,8 +1,9 @@
 ---
 - hosts: "{{ group }}"
   tasks: 
-    - name: 挂载的网络卷启用 
-      command: setsebool -P virt_sandbox_use_fusefs on
+    # 网络卷不存在
+    # - name: 挂载的网络卷启用 
+    #   command: setsebool -P virt_sandbox_use_fusefs on
 
     - name: 挂载的本地文件certs必须符合类型
       command: chcon -R -t svirt_sandbox_file_t /data/usr/certs
@@ -10,9 +11,11 @@
     - name: 挂载的本地文件kubeconfig必须符合类型
       command: chcon -R -t svirt_sandbox_file_t /data/usr/kubernetes/kubeconfig
 
-    - name: 挂载的本地文件filebeat必须符合类型
-      command: chcon -R -t svirt_sandbox_file_t /data/usr/filebeat
+    # filebeat暂时未安装
+    # - name: 挂载的本地文件filebeat必须符合类型
+    #   command: chcon -R -t svirt_sandbox_file_t /data/usr/filebeat
 
+    # 提前注释
     # - name: filebeat从k8s目录采集日志
     #   command: semanage fcontext -a -t docker_var_lib_t "/var/log/containers(/.*)?"
 
@@ -57,3 +60,5 @@
       service:
         name: kube-proxy 
         state: restarted
+  become: yes
+  gather_facts: no

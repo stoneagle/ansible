@@ -1,0 +1,12 @@
+---
+- hosts: "{{ group }}"
+  tasks:
+    - name: 部署harbor服务(本地版)
+      copy: 
+        src: ../files/certs 
+        dest: /etc/flannel/
+    - name: 部署harbor服务(k8s版)
+      copy: 
+        src: ../files/certs 
+        dest: /etc/flannel/
+

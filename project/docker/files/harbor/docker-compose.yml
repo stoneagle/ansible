@@ -1,0 +1,106 @@
+version: '2'
+services:
+  # registry:
+  #   image: cloud/library/docker-registry:2.5.0 
+  #   container_name: ${DEV_USER}-harbor-registry
+  #   restart: always
+  #   volumes:
+  #     # 如果需要本地的存储方式，则配置storage目录
+  #     # - ../data/registry:/storage
+  #     - ./config/registry/:/etc/registry/
+  #   env_file:
+  #     - ./config/registry/env
+  #   environment:
+  #     GODEBUG: cgo
+  #     netdns: cgo
+  #     REGISTRY_NOTIFICATIONS_ENDPOINTS: > 
+  #       - name: harbor 
+  #         url: http://ui/service/notifications
+  #         timeout: 3000ms
+  #         threshold: 5
+  #         backoff: 1s
+  #   command:
+  #     ["serve", "/etc/registry/config.yml"]
+  #   networks:
+  #     - default
+  # 官方镜像
+  # ui:
+  #   image: cloud/library/harbor-ui:0.1.0 
+  #   container_name: ${DEV_USER}-harbor-ui
+  #   env_file:
+  #     - ./config/ui/env
+  #   restart: always
+  #   volumes:
+  #     - ./config/ui/app.conf:/etc/ui/app.conf
+  #     - ./config/ui/private_key.pem:/etc/ui/private_key.pem
+  #     - /data:/harbor_storage
+  #   networks:
+  #     - default
+  # jobservice:
+  #   image: cloud/library/harbor-jobservice:0.1.0 
+  #   container_name: ${DEV_USER}-harbor-jobservice
+  #   env_file:
+  #     - ./config/jobservice/env
+  #   restart: always
+  #   volumes:
+  #     - ../data/job_logs:/var/log/jobs
+  #     - ./config/jobservice/app.conf:/etc/jobservice/app.conf
+  #   depends_on:
+  #     - ui
+  #   networks:
+  #     - default
+
+  # 个性适配(ui与job必须配对使用，官方提供的镜像与0.5.0分支，在硬编码上存在偏差，例如uiSecret交互的匹配)
+  ui:
+    image: cloud/qssweb/golang-beego:1.1.0
+    container_name: ${DEV_USER}-harbor-ui
+    env_file:
+      - ./config/ui/env
+    restart: always
+    volumes:
+      - ./config/ui/app.conf:/etc/ui/app.conf
+      - ./config/ui/private_key.pem:/etc/ui/private_key.pem
+      - ../data/harbor:/harbor_storage
+      - ../../harbor:/go/src/github.com/vmware/harbor/src
+    working_dir: /go/src/github.com/vmware/harbor/src/ui
+    entrypoint:
+      - bee 
+      - run 
+    networks:
+      - default
+  jobservice:
+    image: cloud/qssweb/golang-beego:1.0.0
+    container_name: ${DEV_USER}-harbor-jobservice
+    env_file:
+      - ./config/jobservice/env
+    restart: always
+    volumes:
+      - ../../harbor:/go/src/github.com/vmware/harbor/src
+      - /data/job_logs:/var/log/jobs
+      - ./config/jobservice/app.conf:/etc/jobservice/app.conf
+    working_dir: /go/src/github.com/vmware/harbor/src/jobservice
+    # depends_on:
+    #   - ui
+    entrypoint:
+      - bee 
+      - run 
+    networks:
+      - default
+  # proxy:
+  #   image: cloud/library/nginx:1.11.5
+  #   container_name: ${DEV_USER}-harbor-proxy 
+  #   restart: always
+  #   volumes:
+  #     - ./config/nginx:/etc/nginx
+  #   ports:
+  #     - ${DEV_PORT}:80
+  #     - ${DEV_HTTPS_PORT}:443
+  #   depends_on:
+  #     - ui
+  #     - registry 
+  #   networks:
+  #     - default
+networks:
+  default:
+    external:
+      name: ${DEV_USER}

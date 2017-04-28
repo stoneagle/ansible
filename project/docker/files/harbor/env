@@ -1,0 +1,9 @@
+# Docker Compose运行项目名
+COMPOSE_PROJECT_NAME=harbor
+# id -u
+DEV_UID=15643
+# 开发者账号
+DEV_USER=wuzhongyang
+# 开发使用的端口
+DEV_PORT=7785
+DEV_HTTPS_PORT=7786

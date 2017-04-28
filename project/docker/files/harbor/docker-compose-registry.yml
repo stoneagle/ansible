@@ -1,0 +1,31 @@
+version: '2'
+services:
+  registry:
+    image: cloud/library/docker-registry:2.5.0 
+    container_name: ${DEV_USER}-harbor-registry
+    restart: always
+    volumes:
+      # 如果需要本地的存储方式，则配置storage目录
+      # - ../data/registry:/storage
+      - ./config/registry/:/etc/registry/
+    env_file:
+      - ./config/registry/env
+    environment:
+      GODEBUG: cgo
+      netdns: cgo
+      REGISTRY_NOTIFICATIONS_ENDPOINTS: > 
+        - name: harbor 
+          url: http://ui/service/notifications
+          timeout: 3000ms
+          threshold: 5
+          backoff: 1s
+    command:
+      ["serve", "/etc/registry/config.yml"]
+    expose:
+      - 5000
+    networks:
+      - default
+networks:
+  default:
+    external:
+      name: ${DEV_USER}_default

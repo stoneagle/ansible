@@ -133,8 +133,18 @@
         owner: "root" 
         group: "root" 
         state: link
-    # - name: 查看k8s节点node 
-    #   command: "kubectl --server=https://{{ ansible_eth0.ipv4.address }} --certificate-authority={{ kube_home }}/certs/ca.pem --client-certificate={{ kube_home }}/certs/{{ ansible_nodename }}.pem --client-key={{ kube_home }}/certs/{{ ansible_nodename }}-key.pem get nodes"
+    - name: 查看k8s节点node 
+      command: "kubectl --server=https://{{ ansible_eth0.ipv4.address }} --certificate-authority={{ kube_home }}/certs/ca.pem --client-certificate={{ kube_home }}/certs/{{ ansible_nodename }}.pem --client-key={{ kube_home }}/certs/{{ ansible_nodename }}-key.pem get nodes"
+    - name: 配置master机器config的cluster
+      command: "kubectl config set-cluster {{ group }} --server={{ kube_api_servers }} --certificate-authority={{ kube_home }}/certs/ca.pem"
+    - name: 配置master机器config的user
+      command: "kubectl config set-credentials admin --certificate-authority={{ kube_home }}/certs/ca.pem --client-certificate={{ kube_home }}/certs/{{ ansible_nodename }}.pem --client-key={{ kube_home }}/certs/{{ ansible_nodename }}-key.pem"
+    - name: 配置master机器config的context
+      command: "kubectl config set-context develop --cluster={{ group }} --user=admin"
+    - name: 设置master机器config的context
+      command: "kubectl config use-context develop"
+    # - name: 生成相关secret
+
 
   become: yes
   gather_facts: yes

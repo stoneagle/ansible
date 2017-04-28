@@ -1,6 +1,8 @@
 ---
 - hosts: "{{ group }}"
   serial: 1
+  vars_files:
+    - "../inventory/group_vars/{{ group }}"
   tasks:
     - name: 启用firewall
       service:
@@ -38,12 +40,12 @@
         port: 8472/udp
         state: enabled
 
-    # - name: 配置cluster
-    #   firewalld: 
-    #     permanent: yes
-    #     zone: trusted 
-    #     source: "172.17.0.0/16"
-    #     state: enabled
+    - name: 配置cluster(flannel)
+      firewalld: 
+        permanent: yes
+        zone: trusted 
+        source: "172.17.0.0/16"
+        state: enabled
     
     - name: 配置cluster
       firewalld: 
@@ -53,6 +55,21 @@
         source: "{{ item }}"
         state: enabled
       with_items: "{{ firewalld.trusted_sources }}"
+
+    - name: 配置k8s的防火墙
+      firewalld: 
+        permanent: yes 
+        zone: public 
+        port: 10250/tcp 
+        state: enabled 
+        immediate: yes
+    - name: 配置k8s开发的端口
+      firewalld: 
+        permanent: yes 
+        zone: public 
+        port: 30000-32767/tcp 
+        state: enabled 
+        immediate: yes
 
     - name: 重启firewall
       command: firewall-cmd --reload

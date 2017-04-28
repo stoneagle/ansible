@@ -1,0 +1,6 @@
+# 用于构建带有beego与ldap的开发镜像，用于ui与jobservice
+FROM cloud/library/golang:1.7.1
+
+RUN go get github.com/beego/bee
+RUN apt-get update
+RUN apt-get install libldap2-dev

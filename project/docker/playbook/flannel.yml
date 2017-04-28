@@ -29,9 +29,6 @@
         src: ../templates/flanneld.j2 
         dest: /etc/sysconfig/flanneld
 
-#   - firewalld: permanent=yes zone=public port=8472/udp state=enabled immediate=yes
-#   - firewalld: permanent=yes zone=trusted source='172.17.0.0/16' state=enabled immediate=yes
-
     - name: 启用flanneld
       service: 
         name: flanneld 
