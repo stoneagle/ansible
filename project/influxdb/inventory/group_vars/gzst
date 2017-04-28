@@ -1,0 +1,22 @@
+datacenter: gzst 
+
+# Telegraf
+telegraf_bin: telegraf-0.13.0
+telegraf_home: /data/usr/telegraf
+telegraf_user: search
+telegraf_group: search
+telegraf_config: /data/usr/telegraf/telegraf.conf
+telegraf_pid: /data/var/run/telegraf.pid
+telegraf_log: /data/log/telegraf.log
+
+telegraf_plugins:
+    influxdb_groups:
+        - 8686
+
+telegraf_influxdb:
+    url: http://xxx:8686
+    database: influxdb
+    username: xxx 
+    password: xxx
+    tags:
+        dc: gzst

@@ -1,0 +1,31 @@
+influxdb_release: influxdb-0.13.0-1
+influxdb_conf_template: influxdb-0.13.0.conf.j2
+influxdb_home: /data/usr/influxdb/8686
+influxdb_conf: /data/usr/influxdb/8686/influxdb.conf
+influxdb_data: /data/var/lib/influxdb/8686/data
+influxdb_log: /data/log/influxdb
+influxdb_systemd:
+  name: influxdb-8686
+  description: "InfluxDB on 8686"
+  memory-limit: 32G
+influxdb_stdout: /dev/null
+influxdb_stderr: /data/log/influxdb/influxdb_8686.log
+influxdb_user: root 
+influxdb_group: root 
+
+influxdb:
+    bind-address: ":8688"
+    meta:
+        dir: /data/var/lib/influxdb/8686/meta
+    data:
+        dir: /data/var/lib/influxdb/8686/data
+        wal-dir: /data/var/lib/influxdb/8686/wal
+    admin:
+        enabled: "true"
+        bind-address: ":8683"
+    http:
+        bind-address: ":8686"
+        auth-enabled: "true"
+    hinted-handoff:
+        dir: /data/var/lib/influxdb/8686/hh
+
