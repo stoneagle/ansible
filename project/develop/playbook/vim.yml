@@ -3,81 +3,112 @@
   vars_files:
     - ../inventory/vars/{{ group }}
   tasks:
-   # - name: 安装vimx 
-   #    become: yes
-   #    become_user: root 
-   #    become_method: sudo
-   #    yum:
-   #      name: vim-X11.x86_64 
-   #      state: latest 
-   #    tags: install 
-   #  - name: 安装silver_searcher(支持vim插件ag)
-   #    become: yes
-   #    become_user: root 
-   #    become_method: sudo
-   #    yum:
-   #      name: the_silver_searcher
-   #      state: latest 
-   #    tags: install 
-   #  - name: 安装xsel，作为vim的复制剪贴板 
-   #    become: yes
-   #    become_user: root 
-   #    become_method: sudo
-   #    yum:
-   #      name: xsel 
-   #      state: latest 
-   #    tags: install 
-   #  - name: 从github获取personal_conf 
-   #    git:
-   #      repo: "{{ tool_git_href }}" 
-   #      dest: "{{ home_tool_dir }}" 
-   #      clone: yes 
-   #      update: yes
-   #    tags: github
-   #  - name: 从github获取vundle 
-   #    git:
-   #      repo: "{{ vundle_git_href }}" 
-   #      dest: "{{ home_dir }}/.vim/bundle/Vundle.vim" 
-   #      clone: yes 
-   #      update: yes
-   #    tags: github
-   #  - name: 检查vundle目录是否存在 
-   #    file:
-   #      path: "{{ home_vim_dir }}/bundle/Vundle.vim"
-   #      state: directory
-   #    tags: filelink 
-   #  - name: 生成个人配置的配色软链
-   #    file:
-   #      src: "{{ home_tool_dir }}/colors"
-   #      dest: "{{ home_vim_dir }}/colors"
-   #      owner: "{{ owner }}"
-   #      group: "{{ owner_group }}" 
-   #      state: link 
-   #    tags: filelink 
-   #  - name: 生成个人配置的ftplugin软链
-   #    file:
-   #      src: "{{ home_tool_dir }}/ftplugin"
-   #      dest: "{{ home_vim_dir }}/ftplugin"
-   #      owner: "{{ owner }}"
-   #      group: "{{ owner_group }}" 
-   #      state: link 
-   #    tags: filelink 
-   #  - name: 生成个人配置的ultisnips软链
-   #    file:
-   #      src: "{{ home_tool_dir }}/UltiSnips"
-   #      dest: "{{ home_vim_dir }}/UltiSnips"
-   #      owner: "{{ owner }}" 
-   #      group: "{{ owner_group }}" 
-   #      state: link 
-   #    tags: filelink 
-   #  - name: 生成个人配置的.vimrc软链
-   #    file:
-   #      src: "{{ home_tool_dir }}/.vimrc"
-   #      dest: "{{ home_dir }}/.vimrc"
-   #      owner: "{{ owner }}" 
-   #      group: "{{ owner_group }}" 
-   #      state: link 
-   #    tags: filelink 
+    # - name: 安装vimx 
+    #   become: yes
+    #   become_user: root 
+    #   become_method: sudo
+    #   yum:
+    #     name: vim-X11.x86_64 
+    #     state: latest 
+    #   tags: install 
+    - name: 安装silver_searcher(支持vim插件ag)
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: the_silver_searcher
+        state: latest 
+      tags: install 
+    - name: 安装xsel，作为vim的复制剪贴板 
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: xsel 
+        state: latest 
+      tags: install 
+    - name: 从github获取personal_conf 
+      git:
+        repo: "{{ tool_git_href }}" 
+        dest: "{{ home_tool_dir }}" 
+        clone: yes 
+        update: yes
+      tags: github
+    - name: 从github获取vundle 
+      git:
+        repo: "{{ vundle_git_href }}" 
+        dest: "{{ home_dir }}/.vim/bundle/Vundle.vim" 
+        clone: yes 
+        update: yes
+      tags: github
+    - name: 检查vundle目录是否存在 
+      file:
+        path: "{{ home_vim_dir }}/bundle/Vundle.vim"
+        state: directory
+      tags: filelink 
+    - name: 生成个人配置的配色软链
+      file:
+        src: "{{ home_tool_dir }}/colors"
+        dest: "{{ home_vim_dir }}/colors"
+        owner: "{{ owner }}"
+        group: "{{ owner_group }}" 
+        state: link 
+      tags: filelink 
+    - name: 生成个人配置的ftplugin软链
+      file:
+        src: "{{ home_tool_dir }}/ftplugin"
+        dest: "{{ home_vim_dir }}/ftplugin"
+        owner: "{{ owner }}"
+        group: "{{ owner_group }}" 
+        state: link 
+      tags: filelink 
+    - name: 生成个人配置的ultisnips软链
+      file:
+        src: "{{ home_tool_dir }}/UltiSnips"
+        dest: "{{ home_vim_dir }}/UltiSnips"
+        owner: "{{ owner }}" 
+        group: "{{ owner_group }}" 
+        state: link 
+      tags: filelink 
+    - name: 生成个人配置的.vimrc软链
+      file:
+        src: "{{ home_tool_dir }}/.vimrc"
+        dest: "{{ home_dir }}/.vimrc"
+        owner: "{{ owner }}" 
+        group: "{{ owner_group }}" 
+        state: link 
+      tags: filelink 
+    - name: 安装相关插件
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: gcc,python34,python34-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
+        state: latest
+    - name: 下载vim8.0的压缩包
+      get_url: 
+        url: https://github.com/vim/vim/archive/master.zip
+        dest: "{{ home_dir }}/src"
+    - name: 解压缩vim8.0的压缩包 
+      unarchive: 
+        src: "{{ home_dir }}/src/vim-master.zip"
+        dest: "{{ home_dir }}/src"
+        remote_src: true
+    - name: 配置vim8.0相关文件
+      command: ./configure --prefix=/opt/vim8 --enable-fail-if-missing --enable-python3interp --enable-multibyte --enable-fontset --with-features=huge 
+      args:
+        chdir: "{{ home_dir }}/src/vim-master"
+    - name: make vim8.0
+      command: make 
+      args:
+        chdir: "{{ home_dir }}/src/vim-master"
+    - name: make install vim8.0
+      become: yes
+      become_user: root 
+      become_method: sudo
+      command: make install 
+      args:
+        chdir: "{{ home_dir }}/src/vim-master"
     - name: 安装vim插件 
       # shell: vim -E -s -c "source {{ home_dir }}/.vimrc" +PluginInstall +qall -V 
       # 当插件较多时，这部分会比较慢

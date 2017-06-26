@@ -1,0 +1,77 @@
+---
+- hosts: "{{ group }}"
+  # vars_files:
+  #   - ../inventory/vars/{{ group }}
+  tasks:
+    - name: 复制docker的repo 
+      copy: 
+        src: ../files/Docker.repo 
+        dest: /etc/yum.repos.d/
+    - name: 安装17.03.0.ce-1.el7.centos版本docker-engine
+      yum: 
+        name: docker-engine-17.03.0.ce-1.el7.centos
+        state: present 
+    - name: 安装系统工具
+      yum: 
+        name: ack,htop,sysstat,mlocate,bash-completion,vim 
+        state: latest
+
+    # 调整服务器
+    - name: 调整服务器配置
+      command: tuned-adm profile throughput-performance
+    - yum: name=ntp state=latest
+    - service: name=ntpd enabled=yes
+    - service: name=ntpd state=started
+    - yum: name=numad state=latest
+    - service: name=numad enabled=yes
+    - service: name=numad state=started
+
+    - name: 复制docker系统服务
+      copy: 
+        src: ../files/system/docker.service.d 
+        dest: /etc/systemd/system/
+    - name: 检查linux系统配置文件中，网桥arptables的设定 
+      lineinfile:
+        dest: /etc/sysctl.d/99-sysctl.conf
+        state: present
+        line: "net.bridge.bridge-nf-call-arptables = 1"
+    - name: 检查linux系统配置文件中，网桥ip6tables的设定 
+      lineinfile:
+        dest: /etc/sysctl.d/99-sysctl.conf
+        state: present
+        line: "net.bridge.bridge-nf-call-ip6tables = 1"
+    - name: 检查linux系统配置文件中，网桥iptables的设定 
+      lineinfile:
+        dest: /etc/sysctl.d/99-sysctl.conf
+        state: present
+        line: "net.bridge.bridge-nf-call-iptables = 1"
+
+    - name: 重启系统服务
+      command: systemctl daemon-reload
+    - name: 启用docker
+      service: 
+        name: docker 
+        enabled: yes
+    - name: 启动docker
+      service: 
+        name: docker 
+        state: started
+
+    # 安装docker-compose
+    - name: 复制docker-compose的执行工具
+      copy: 
+        src: ../releases/docker-compose-Linux-x86_64 
+        dest: /usr/bin/docker-compose
+    - name: 更新docker-compose命令权限
+      file: 
+        path: /usr/bin/docker-compose 
+        mode: 0755
+    - name: 安装相关插件
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: gcc,python34,python34-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
+        state: latest
+  become: yes
+  gather_facts: no
