@@ -17,11 +17,13 @@
         state: latest
 
     # 调整服务器
-    - name: 调整服务器配置
+    - name: 调整服务器配置(修改为虚拟机配置)
       command: tuned-adm profile throughput-performance
+    # 时间是否开启
     - yum: name=ntp state=latest
     - service: name=ntpd enabled=yes
     - service: name=ntpd state=started
+    # numad多cpu是否启用
     - yum: name=numad state=latest
     - service: name=numad enabled=yes
     - service: name=numad state=started
@@ -30,6 +32,7 @@
       copy: 
         src: ../files/system/docker.service.d 
         dest: /etc/systemd/system/
+    # 确定iptable是否开启 
     - name: 检查linux系统配置文件中，网桥arptables的设定 
       lineinfile:
         dest: /etc/sysctl.d/99-sysctl.conf
@@ -57,7 +60,7 @@
         name: docker 
         state: started
 
-    # 安装docker-compose
+    # 安装docker-compose(通过python安装)
     - name: 复制docker-compose的执行工具
       copy: 
         src: ../releases/docker-compose-Linux-x86_64 
@@ -71,7 +74,9 @@
       become_user: root 
       become_method: sudo
       yum:
-        name: gcc,python34,python34-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
+        name: gcc,python34,python34-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,cscope,gitflow,npm
         state: latest
+    # sshd-banner
+    # crontab
   become: yes
   gather_facts: no

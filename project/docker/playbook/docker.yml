@@ -55,7 +55,7 @@
     - name: 拉取rhel7的镜像
       command: "docker pull {{ docker_registry }}/rhel7/pod-infrastructure"
     - name: 拉取hyperkube镜像 
-      command: "docker pull {{ docker_registry }}/google_containers/hyperkube:v1.3.0"
+      command: "docker pull {{ docker_registry }}/google_containers/hyperkube:{{ kube_version }}"
 
     # 安装docker-compose
     - name: 复制docker-compose的执行工具(下载地址被墙，可去github查询) 

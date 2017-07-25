@@ -5,7 +5,7 @@ Requires=docker.service
 
 [Service]
 EnvironmentFile=-{{ kube_home }}/cfg/kubelet
-ExecStart={{ kube_home }}/kubernetes/server/bin/kubelet \
+ExecStart={{ kube_home }}/kubernetes/kubelet \
           $KUBE_LOGTOSTDERR     \
           $KUBE_LOG_LEVEL       \
           $NODE_ADDRESS         \

@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 EnvironmentFile=-{{ kube_home }}/cfg/kube-proxy
-ExecStart={{ kube_home }}/kubernetes/server/bin/kube-proxy \
+ExecStart={{ kube_home }}/kubernetes/kube-proxy \
           $KUBE_LOGTOSTDERR \
           $KUBE_LOG_LEVEL \
           $NODE_HOSTNAME \

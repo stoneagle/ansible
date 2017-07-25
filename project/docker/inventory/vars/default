@@ -41,6 +41,9 @@ etcd_config:
 kube_home: /data/usr/kubernetes
 kube_user: search
 kube_group: search
+kube_namespace: kube-system 
+kube_version: v1.5.1 
+kube_update_version: 1.5.1 
 
 kube_cluster_name: kube-gzst
 kube_etcd_servers: https://xxx:2379,https://yyy:2379,https://zzz:2379

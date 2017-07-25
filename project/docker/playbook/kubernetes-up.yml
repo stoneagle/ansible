@@ -1,0 +1,46 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - "../inventory/vars/{{ group }}"
+  tasks:
+    - name: 根据模板更新kubelet配置
+      template: 
+        src: ../templates/kubelet.j2 
+        dest: "{{ kube_home }}/cfg/kubelet" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}"
+    - name: 删除旧版k8s的client二进制软链目录
+      file: 
+        path: "{{ kube_home }}/kubernetes" 
+        state: absent 
+    # - name: 复制对应版本的client二进制文件(需要去官网下载准备)
+    #   copy:
+    #     src: "../release/kubernetes-{{ kube_update_version }}"
+    #     dest: "{{ kube_home }}/kubernetes-{{ kube_update_version }}" 
+    #     owner: "{{ kube_user }}" 
+    #     group: "{{ kube_group }}" 
+    # - name: 创建k8s目录的软链
+    #   file: 
+    #     src: "{{ kube_home }}/kubernetes-{{ kube_update_version }}" 
+    #     path: "{{ kube_home }}/kubernetes" 
+    #     owner: "{{ kube_user }}" 
+    #     group: "{{ kube_group }}" 
+    #     state: link
+    - name: 根据模板更新kubelet.service配置
+      template: 
+        src: ../templates/kubelet.service.j2 
+        dest: /etc/systemd/system/kubelet.service
+    - name: 根据模板更新kubeproxy配置
+      template: 
+        src: ../templates/kube-proxy.j2 
+        dest: "{{ kube_home }}/cfg//kube-proxy" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}"
+    - name: 根据模板更新kubeproxy,service配置
+      template: 
+        src: ../templates/kube-proxy.service.j2 
+        dest: /etc/systemd/system/kube-proxy.service
+    # - name: 重启系统服务
+    #   command: systemctl daemon-reload
+  become: yes
+  gather_facts: yes

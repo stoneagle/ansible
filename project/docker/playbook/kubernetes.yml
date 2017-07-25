@@ -81,27 +81,27 @@
       tags: client 
     
     # 以下apiserver,controller,scheduler三个是服务端部署
-    # - name: 生成kube-apiserver的配置
-    #   template: 
-    #     src: "../templates/manifests/kube-apiserver.yaml.j2" 
-    #     dest: "{{ kube_home }}/manifests/kube-apiserver.yaml" 
-    #     owner: "{{ kube_user }}" 
-    #     group: "{{ kube_group }}"
-    #   tags: server
-    # - name: 生成kube-controller的配置
-    #   template: 
-    #     src: "../templates/manifests/kube-controller-manager.yaml.j2" 
-    #     dest: "{{ kube_home }}/manifests/kube-controller-manager.yaml" 
-    #     owner: "{{ kube_user }}" 
-    #     group: "{{ kube_group }}"
-    #   tags: server
-    # - name: 生成kube-scheduler的配置
-    #   template: 
-    #     src: "../templates/manifests/kube-scheduler.yaml.j2" 
-    #     dest: "{{ kube_home }}/manifests/kube-scheduler.yaml" 
-    #     owner: "{{ kube_user }}" 
-    #     group: "{{ kube_group }}"
-    #   tags: server
+    - name: 生成kube-apiserver的配置
+      template: 
+        src: "../templates/manifests/kube-apiserver.yaml.j2" 
+        dest: "{{ kube_home }}/manifests/kube-apiserver.yaml" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}"
+      tags: server
+    - name: 生成kube-controller的配置
+      template: 
+        src: "../templates/manifests/kube-controller-manager.yaml.j2" 
+        dest: "{{ kube_home }}/manifests/kube-controller-manager.yaml" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}"
+      tags: server
+    - name: 生成kube-scheduler的配置
+      template: 
+        src: "../templates/manifests/kube-scheduler.yaml.j2" 
+        dest: "{{ kube_home }}/manifests/kube-scheduler.yaml" 
+        owner: "{{ kube_user }}" 
+        group: "{{ kube_group }}"
+      tags: server
     
     - name: 重启系统服务
       command: systemctl daemon-reload
@@ -128,7 +128,7 @@
 
     - name: 创建kubectl的软链
       file: 
-        src: "{{ kube_home }}/kubernetes/server/bin/kubectl" 
+        src: "{{ kube_home }}/kubernetes/kubectl" 
         path: "/usr/bin/kubectl" 
         owner: "root" 
         group: "root" 
@@ -144,7 +144,5 @@
     - name: 设置master机器config的context
       command: "kubectl config use-context develop"
     # - name: 生成相关secret
-
-
   become: yes
   gather_facts: yes
