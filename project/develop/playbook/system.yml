@@ -1,0 +1,66 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    - name: 安装系统工具
+      yum: 
+        name: ack,htop,iotop,iftop,sysstat,mlocate,bash-completion,vim 
+        state: latest
+    - name: 安装系统组件
+      yum:
+        name: gcc,wget,libzip,bzip2,git,unzip,cscope,gitflow
+        state: latest
+    - name: 调整服务器配置
+      command: tuned-adm profile virtual-guest
+    - name: 避免升级内核
+      lineinfile: 
+        dest: /etc/yum.conf 
+        state: present
+        line: "exclude=kernel* centos-release* redhat-release*"
+    - name: 开启时间同步
+      yum: 
+        name: ntp 
+        state: latest
+    - name: 启用时间同步服务
+      service: 
+        name: ntpd 
+        enabled: yes
+    - name: 启动时间同步服务
+      service: 
+        name: ntpd 
+        state: started 
+    - name: 复制login banner文件
+      copy: 
+        src: ../files/banners
+        dest: /etc/ssh/sshd-banner
+      tags: banner
+    - name: 增加banner文件配置 
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: '^#Banner none'
+        line: "Banner /etc/ssh/sshd-banner"
+      tags: banner
+    - name: 重启sshd服务    
+      service: 
+        name: sshd 
+        state: restarted 
+      tags: banner
+    - name: 从github获取personal_conf 
+      git:
+        repo: "{{ tool_git_href }}" 
+        dest: "{{ home_tool_dir }}" 
+        clone: yes 
+        update: yes
+      tags: github
+    - name: 复制.gitconfig文件 
+      copy: 
+        src: "{{ home_tool_dir }}/.gitconfig" 
+        dest: "{{ home_dir }}" 
+    - name: 复制locale文件 
+      copy: 
+        src: "{{ home_tool_dir }}/locale.conf"
+        dest: "/etc" 
+      become: yes
+      become_user: root 
+      become_method: sudo
