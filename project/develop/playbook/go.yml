@@ -32,4 +32,11 @@
         path: "{{ home_dir }}/go_project/src"
         state: directory
       tags: file 
-
+    - name: 安装glide依赖管理工具
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: glide 
+        state: latest 
+      tags: install 
