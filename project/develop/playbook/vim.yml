@@ -34,6 +34,29 @@
         clone: yes 
         update: yes
       tags: github
+    - name: 从github获取fzf
+      git:
+        repo: "https://github.com/junegunn/fzf.git" 
+        dest: "{{ home_dir }}/.fzf" 
+        clone: yes 
+        update: yes
+      tags: github
+    - name: 安装fzf 
+      command: "{{ home_dir }}/.fzf/install --all" 
+      tags: fzf 
+    - name: 删除初始的key-bindings.zsh文件
+      file:
+        path: "{{ home_dir }}/.fzf/shell/key-bindings.zsh"
+        state: absent 
+      tags: fzf 
+    - name: 新增key-bindings.zsh的软链
+      file:
+        src: "{{ home_tool_dir }}/key-bindings.zsh"
+        dest: "{{ home_dir }}/.fzf/shell"
+        owner: "{{ owner }}"
+        group: "{{ owner_group }}" 
+        state: link 
+      tags: fzf 
     - name: 从github获取vundle 
       git:
         repo: "{{ vundle_git_href }}" 
@@ -83,7 +106,7 @@
       become_user: root 
       become_method: sudo
       yum:
-        name: gcc,python34,python34-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
+        name: gcc,python34,python34-devel,python,python-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
         state: latest
     - name: 下载vim8.0的压缩包
       get_url: 
@@ -95,7 +118,7 @@
         dest: "{{ home_dir }}/src"
         remote_src: true
     - name: 配置vim8.0相关文件
-      command: ./configure --prefix=/opt/vim8 --enable-fail-if-missing --enable-python3interp --enable-multibyte --enable-fontset --with-features=huge 
+      command: ./configure --prefix=/opt/vim8 --enable-fail-if-missing --enable-python3interp --enable-multibyte --enable-fontset --with-features=huge --enable-pythoninterp --with-python-config-dir=/usr/lib64/python2.7/config
       args:
         chdir: "{{ home_dir }}/src/vim-master"
     - name: make vim8.0

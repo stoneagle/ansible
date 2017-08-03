@@ -52,4 +52,10 @@
       # 需要提交密码
       shell: "chsh -s /bin/zsh <<< {{chsh_password}}"
       tags: file 
-
+    - name: 从github获取zsh-autosuggestions
+      git:
+        repo: "git://github.com/zsh-users/zsh-autosuggestions" 
+        dest: "{{ home_dir }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions" 
+        clone: yes 
+        update: yes
+      tags: github
