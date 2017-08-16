@@ -52,7 +52,7 @@
     - name: 新增key-bindings.zsh的软链
       file:
         src: "{{ home_tool_dir }}/key-bindings.zsh"
-        dest: "{{ home_dir }}/.fzf/shell"
+        dest: "{{ home_dir }}/.fzf/shell/key-bindings.zsh"
         owner: "{{ owner }}"
         group: "{{ owner_group }}" 
         state: link 
