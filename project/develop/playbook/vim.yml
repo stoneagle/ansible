@@ -34,29 +34,6 @@
         clone: yes 
         update: yes
       tags: github
-    - name: 从github获取fzf
-      git:
-        repo: "https://github.com/junegunn/fzf.git" 
-        dest: "{{ home_dir }}/.fzf" 
-        clone: yes 
-        update: yes
-      tags: github
-    - name: 安装fzf 
-      command: "{{ home_dir }}/.fzf/install --all" 
-      tags: fzf 
-    - name: 删除初始的key-bindings.zsh文件
-      file:
-        path: "{{ home_dir }}/.fzf/shell/key-bindings.zsh"
-        state: absent 
-      tags: fzf 
-    - name: 新增key-bindings.zsh的软链
-      file:
-        src: "{{ home_tool_dir }}/key-bindings.zsh"
-        dest: "{{ home_dir }}/.fzf/shell/key-bindings.zsh"
-        owner: "{{ owner }}"
-        group: "{{ owner_group }}" 
-        state: link 
-      tags: fzf 
     - name: 从github获取vundle 
       git:
         repo: "{{ vundle_git_href }}" 
@@ -107,7 +84,7 @@
       become_method: sudo
       yum:
         # name: gcc,python34,python34-devel,python,python-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
-        name: gcc,python34,python34-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
+        name: gcc,python34,python34-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow,cmake,gcc-c++,mariadb
         state: latest
     - name: 下载vim8.0的压缩包
       get_url: 
@@ -140,4 +117,74 @@
       shell: vim +PluginInstall +qall 
       ignore_errors: yes
       tags: plugin 
-
+    - name: 安装npm
+      become: yes
+      become_user: root 
+      become_method: sudo
+      yum:
+        name: npm.x86_64 
+        state: latest 
+      tags: npm 
+    - name: npm配置国内镜像
+      command: npm config set registry http://registry.cnpmjs.org
+      become: yes
+      become_user: root
+      become_method: sudo
+      tags: npm 
+    - name: npm安装typescript 
+      command: npm install -g typescript
+      become: yes
+      become_user: root
+      become_method: sudo
+      tags: npm 
+    - name: 拷贝YouCompleteMe
+      copy: 
+        src: ../release/YouCompleteMe.tar
+        dest: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
+      tags: ycm 
+    - name: 解压缩YouCompleteMe
+      unarchive: 
+        src: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
+        dest: "{{ home_dir }}/.vim/bundle"
+        remote_src: true
+      tags: ycm 
+    - name: 删除YCM的tar包 
+      file:
+        path: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
+        state: absent 
+      tags: ycm 
+    - name: 安装YouCompleteMe
+      command: python3 ./install.py --gocode-completer --tern-completer # 支持c/c++/c#需要添加参数--clang-completer 
+      args:
+        chdir: "{{ home_dir }}/.vim/bundle/YouCompleteMe"
+      tags: ycm 
+    # - name: 拷贝GLIBCXX >=3.4.20
+    #   copy: 
+    #     src: ../release/libstdc++.so.6.0.21
+    #     dest: "{{ home_dir }}/.vim/YouCompleteMe.tar"
+    - name: 下载七牛云的qshell
+      git:
+        repo: "https://git.oschina.net/zhangchao123/qshell.git" 
+        dest: "{{ home_dir }}/src/qshell" 
+        clone: yes 
+        update: yes
+      tags: qshell
+    - name: 复制qshell
+      copy: 
+        src: "{{ home_dir }}/src/qshell/qshell/qshell_linux_amd64" 
+        dest: /usr/bin/qshell
+      become: yes
+      become_user: root
+      become_method: sudo
+      tags: qshell
+    - name: 更新私钥文件权限
+      file: 
+        path: "{{ item.path }}" 
+        mode: "644"
+      become: yes
+      become_user: root
+      become_method: sudo
+      tags: qshell
+    - name: 添加qshell的account 
+      command: qshell account 9HdHsPGJ7lxHMCtzB0q8qFatx-c5QpvigPy0Uog- 8N0hA_ngYi0vGxDkBm4yagZs3SFTUiTOY3fnUCIG 
+      tags: qshell

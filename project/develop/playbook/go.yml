@@ -40,3 +40,24 @@
         name: glide 
         state: latest 
       tags: install 
+    - name: 检查gopkg目录是否存在 
+      file:
+        path: "{{ home_vim_dir }}/go/gopkg"
+        state: directory
+      tags: vimgo 
+    - name: 拷贝vim-go的相关插件
+      copy: 
+        src: ../release/go_pkg.tar
+        dest: "{{ home_dir }}/go/go_pkg.tar"
+      tags: vimgo 
+    - name: 解压缩gopkg
+      unarchive: 
+        src: "{{ home_dir }}/go/go_pkg.tar"
+        dest: "{{ home_dir }}/go"
+        remote_src: true
+      tags: vimgo 
+    - name: 删除gopkg的tar包 
+      file:
+        path: "{{ home_dir }}/go/go_pkg.tar"
+        state: absent 
+      tags: vimgo 
