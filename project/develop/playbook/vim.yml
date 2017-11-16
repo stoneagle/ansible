@@ -84,8 +84,13 @@
       become_method: sudo
       yum:
         # name: gcc,python34,python34-devel,python,python-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
-        name: gcc,python34,python34-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow,cmake,gcc-c++,mariadb
+        name: epel-release,gcc,python34,python34-devel,python34-setuptools,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow,cmake,gcc-c++,mariadb
         state: latest
+    - name: 安装pip3
+      command: easy_install-3.4 pip 
+      become: yes
+      become_user: root 
+      become_method: sudo
     - name: 下载vim8.0的压缩包
       get_url: 
         url: https://github.com/vim/vim/archive/master.zip
