@@ -1,0 +1,37 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    - name: 下载ta-lib-0.4.0的压缩包
+      get_url: 
+        url: https://jaist.dl.sourceforge.net/project/ta-lib/ta-lib/0.4.0/ta-lib-0.4.0-src.tar.gz 
+        dest: "{{ home_src_dir }}"
+      tags: download
+    - name: 解压缩ta-lib-0.4.0的压缩包 
+      unarchive: 
+        src: "{{ home_src_dir }}/ta-lib-0.4.0-src.tar.gz"
+        dest: "{{ home_src_dir }}"
+        remote_src: true
+    # - name: 删除ta-lib-0.4.0的压缩包 
+    #   file:
+    #     path: "{{ home_src_dir }}/ta-lib-0.4.0-src.tar.gz"
+    #     state: absent
+    - name: 配置ta-lib
+      command: ./configure --prefix=/usr
+      args:
+        chdir: "{{ home_src_dir }}/ta-lib"
+      become: yes
+      become_user: root 
+      become_method: sudo
+      tags: install 
+    - name: 安装ta-lib
+      command: make && make install
+      args:
+        chdir: "{{ home_src_dir }}/ta-lib"
+      become: yes
+      become_user: root 
+      become_method: sudo
+      tags: install 
+  become: yes
+  gather_facts: no

@@ -1,4 +1,5 @@
 home_dir: /home/wuzhongyang
+home_src_dir: /home/wuzhongyang/src
 home_tool_dir: /home/wuzhongyang/src/personal_tool_conf
 home_vim_dir: /home/wuzhongyang/.vim
 owner: wuzhongyang
