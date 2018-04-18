@@ -1,0 +1,51 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  remote_user: wuzhongyang
+  tasks:
+    - name: 安装development tools
+      yum:
+        name: "@Development tools"
+        state: present
+        skip_broken: yes
+    - name: 安装shadowsocks
+      command: pip install shadowsocks 
+    - name: 根据模板配置
+      template: 
+        src: ../templates/shadowsocks.j2 
+        dest: /etc/shadowsocks.json
+    - name: 复制shadowsocks客户端服务
+      copy: 
+        src: ../files/shadowsocks.service
+        dest: /etc/systemd/system/
+    - name: 重启系统服务
+      command: systemctl daemon-reload
+    - name: 启用shadowsocks
+      service: 
+        name: shadowsocks 
+        enabled: yes
+    - name: 启动shadowsocks
+      service: 
+        name: shadowsocks 
+        state: started
+    - name: 安装privoxy
+      yum:
+        name: privoxy 
+        state: latest 
+    - name: 检查privoxy配置文件中，监听配置
+      lineinfile:
+        dest: /etc/privoxy/config
+        state: present
+        line: "listen-address  127.0.0.1:8118"
+    - name: 检查privoxy配置文件中，转发配置
+      lineinfile:
+        dest: /etc/privoxy/config
+        state: present
+        line: "forward-socks5t / 127.0.0.1:1080 ."
+    - name: 启动shadowsocks
+      service: 
+        name: privoxy 
+        state: started
+  become: yes
+  gather_facts: no
