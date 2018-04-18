@@ -3,20 +3,37 @@
   vars_files:
     - ../inventory/vars/{{ group }}
   tasks:
-    - name: 复制docker的repo 
-      copy: 
-        src: ../files/Docker.repo 
-        dest: /etc/yum.repos.d/
-    - name: 安装docker-engine
+    # 国内被屏蔽
+    # - name: 复制docker的repo 
+    #   copy: 
+    #     src: ../files/Docker.repo 
+    #     dest: /etc/yum.repos.d/
+    # - name: 安装docker-engine
+    #   yum: 
+    #     name: docker-engine 
+    #     state: latest
+         
+    - name: 安装相关组件
+      yum:
+        name: yum-utils,device-mapper-persistent-data,lvm2 
+        state: latest
+    - name: 安装阿里docker源
+      shell: "yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo" 
+      args:
+        executable: /bin/zsh
+    - name: 替换docker源配置 
+      shell: "sed -i 's+download-stage.docker.com+mirrors.tuna.tsinghua.edu.cn/docker-ce+' /etc/yum.repos.d/docker-ce.repo" 
+      args:
+        executable: /bin/zsh
+    - name: 安装docker-ce
       yum: 
-        name: docker-engine 
+        name: docker-ce
         state: latest
 
     - name: 复制docker系统服务
       copy: 
         src: ../files/system/docker.service.d 
         dest: /etc/systemd/system/
-
     - name: 检查linux系统配置文件中，网桥arptables的设定 
       lineinfile:
         dest: /etc/sysctl.d/99-sysctl.conf
@@ -32,7 +49,6 @@
         dest: /etc/sysctl.d/99-sysctl.conf
         state: present
         line: "net.bridge.bridge-nf-call-iptables = 1"
-
     - name: 重启系统服务
       command: systemctl daemon-reload
     - name: 启用docker
@@ -44,28 +60,32 @@
         name: docker 
         state: started
 
-    - name: 初始化docker目录
-      file: 
-        path: "/root/.docker" 
-        state: directory
-    - name: 根据模板生成docker配置
-      template: 
-        src: ../templates/docker_config.j2 
-        dest: /root/.docker/config.json
-    - name: 拉取rhel7的镜像
-      command: "docker pull {{ docker_registry }}/rhel7/pod-infrastructure"
-    - name: 拉取hyperkube镜像 
-      command: "docker pull {{ docker_registry }}/google_containers/hyperkube:{{ kube_version }}"
-
+    # 个人k8s环境配置
+    # - name: 初始化docker目录
+    #   file: 
+    #     path: "/root/.docker" 
+    #     state: directory
+    # - name: 根据模板生成docker配置
+    #   template: 
+    #     src: ../templates/docker_config.j2 
+    #     dest: /root/.docker/config.json
+    # - name: 拉取rhel7的镜像
+    #   command: "docker pull {{ docker_registry }}/rhel7/pod-infrastructure"
+    # - name: 拉取hyperkube镜像 
+    #   command: "docker pull {{ docker_registry }}/google_containers/hyperkube:{{ kube_version }}"
+     
     # 安装docker-compose
-    - name: 复制docker-compose的执行工具(下载地址被墙，可去github查询) 
-      copy: 
-        src: ../releases/docker-compose-Linux-x86_64 
-        dest: /usr/bin/docker-compose
+    # - name: 复制docker-compose的执行工具(下载地址被墙，可去github查询) 
+    #   copy: 
+    #     src: ../releases/docker-compose-Linux-x86_64 
+    #     dest: /usr/bin/docker-compose
+    - name: 下载docker-compose
+      shell: "curl -L https://get.daocloud.io/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose" 
+      args:
+        executable: /bin/zsh
     - name: 更新docker-compose命令权限
       file: 
         path: /usr/bin/docker-compose 
         mode: 0755
-
   become: yes
   gather_facts: no
