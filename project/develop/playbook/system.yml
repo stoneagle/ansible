@@ -46,20 +46,5 @@
         name: sshd 
         state: restarted 
       tags: banner
-    - name: 从github获取personal_conf 
-      git:
-        repo: "{{ tool_git_href }}" 
-        dest: "{{ home_tool_dir }}" 
-        clone: yes 
-        update: yes
-      tags: github
-    - name: 复制.gitconfig文件 
-      copy: 
-        src: "{{ home_tool_dir }}/.gitconfig" 
-        dest: "{{ home_dir }}" 
-    - name: 复制locale文件 
-      copy: 
-        src: "{{ home_tool_dir }}/locale.conf"
-        dest: "/etc" 
   become: yes
   gather_facts: no

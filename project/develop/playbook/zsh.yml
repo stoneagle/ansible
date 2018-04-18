@@ -24,9 +24,6 @@
         state: present
       tags: file 
     - name: 下载oh-my-zsh
-      become: yes
-      become_user: root 
-      become_method: sudo
       shell: sh "{{ home_tool_dir }}/oh-my-zsh-install.sh" 
       tags: file 
     - name: 删除初始的.zshrc文件

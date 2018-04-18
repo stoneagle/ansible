@@ -1,0 +1,34 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  remote_user: wuzhongyang
+  tasks:
+    - name: 拷贝YouCompleteMe
+      copy: 
+        src: ../release/YouCompleteMe.tar
+        dest: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
+      tags: ycm 
+    - name: 解压缩YouCompleteMe
+      unarchive: 
+        src: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
+        dest: "{{ home_dir }}/.vim/bundle"
+        remote_src: true
+      tags: ycm 
+    - name: 删除YCM的tar包 
+      file:
+        path: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
+        state: absent 
+      tags: ycm 
+    - name: 安装YouCompleteMe(依赖golang)
+      command: python3 ./install.py --gocode-completer --tern-completer # 支持c/c++/c#需要添加参数--clang-completer 
+      args:
+        chdir: "{{ home_dir }}/.vim/bundle/YouCompleteMe"
+      tags: ycm 
+    - name: 安装vim中的go插件 
+      # 需要zsh的支持
+      shell: /bin/zsh -l -c "vim +GoInstallBinaries +qall"
+      args:
+        chdir: "{{ home_dir }}"
+      ignore_errors: yes
+      tags: plugin 

@@ -34,6 +34,17 @@
         clone: yes 
         update: yes
       tags: github
+    - name: 复制.gitconfig文件 
+      copy: 
+        src: "{{ home_tool_dir }}/.gitconfig" 
+        dest: "{{ home_dir }}" 
+    - name: 复制locale文件 
+      become: yes
+      become_user: root 
+      become_method: sudo
+      copy: 
+        src: "{{ home_tool_dir }}/locale.conf"
+        dest: "/etc" 
     - name: 从github获取vundle 
       git:
         repo: "{{ vundle_git_href }}" 
@@ -83,8 +94,8 @@
       become_user: root 
       become_method: sudo
       yum:
-        # name: gcc,python34,python34-devel,python,python-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
-        name: epel-release,gcc,python34,python34-devel,python34-setuptools,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow,cmake,gcc-c++,mariadb,ctags
+        # name: m2crypto,epel-release,gcc,python34,python34-devel,python,python-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
+        name: m2crypto,epel-release,gcc,python34,python34-devel,python34-setuptools,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow,cmake,gcc-c++,mariadb,ctags
         state: latest
     - name: 安装pip3
       command: easy_install-3.4 pip 
@@ -136,27 +147,6 @@
       become_user: root
       become_method: sudo
       tags: npm 
-    - name: 拷贝YouCompleteMe
-      copy: 
-        src: ../release/YouCompleteMe.tar
-        dest: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
-      tags: ycm 
-    - name: 解压缩YouCompleteMe
-      unarchive: 
-        src: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
-        dest: "{{ home_dir }}/.vim/bundle"
-        remote_src: true
-      tags: ycm 
-    - name: 删除YCM的tar包 
-      file:
-        path: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
-        state: absent 
-      tags: ycm 
-    - name: 安装YouCompleteMe
-      command: python3 ./install.py --gocode-completer --tern-completer # 支持c/c++/c#需要添加参数--clang-completer 
-      args:
-        chdir: "{{ home_dir }}/.vim/bundle/YouCompleteMe"
-      tags: ycm 
     # - name: 拷贝GLIBCXX >=3.4.20
     #   copy: 
     #     src: ../release/libstdc++.so.6.0.21
