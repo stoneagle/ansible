@@ -1,0 +1,24 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    - name: 安装npm
+      yum:
+        name: npm.x86_64 
+        state: latest 
+      tags: npm 
+    - name: 配置国内镜像
+      # command: npm config set registry http://registry.cnpmjs.org
+      command: npm config set registry https://registry.npm.taobao.org 
+      tags: npm 
+    - name: 安装typescript 
+      command: npm install -g typescript
+      tags: npm 
+    - name: 安装angular
+      command: npm install -g @angular/cli
+      tags: npm 
+    # - name: 安装NgAlain
+    #   command: npm install -g @angular-devkit/core @angular-devkit/schematics @schematics/schematics rxjs
+  become: yes
+  gather_facts: no

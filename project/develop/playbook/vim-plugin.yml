@@ -32,3 +32,9 @@
         chdir: "{{ home_dir }}"
       ignore_errors: yes
       tags: plugin 
+    - name: 安装vim插件 
+      # shell: vim -E -s -c "source {{ home_dir }}/.vimrc" +PluginInstall +qall -V 
+      # 当插件较多时，这部分会比较慢
+      shell: vim +PluginInstall +qall 
+      ignore_errors: yes
+      tags: plugin 

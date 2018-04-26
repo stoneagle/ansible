@@ -55,3 +55,5 @@
         path: "{{ home_dir }}/go/go_pkg.tar"
         state: absent 
       tags: vimgo 
+    - name: 安装dep包管理器
+      command: go get -u github.com/golang/dep/cmd/dep 

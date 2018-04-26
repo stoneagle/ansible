@@ -127,26 +127,6 @@
       command: make install 
       args:
         chdir: "{{ home_dir }}/src/vim-master"
-    - name: 安装npm
-      become: yes
-      become_user: root 
-      become_method: sudo
-      yum:
-        name: npm.x86_64 
-        state: latest 
-      tags: npm 
-    - name: npm配置国内镜像
-      command: npm config set registry http://registry.cnpmjs.org
-      become: yes
-      become_user: root
-      become_method: sudo
-      tags: npm 
-    - name: npm安装typescript 
-      command: npm install -g typescript
-      become: yes
-      become_user: root
-      become_method: sudo
-      tags: npm 
     # - name: 拷贝GLIBCXX >=3.4.20
     #   copy: 
     #     src: ../release/libstdc++.so.6.0.21
@@ -178,9 +158,3 @@
     - name: 添加qshell的account 
       command: qshell account 9HdHsPGJ7lxHMCtzB0q8qFatx-c5QpvigPy0Uog- 8N0hA_ngYi0vGxDkBm4yagZs3SFTUiTOY3fnUCIG 
       tags: qshell
-    - name: 安装vim插件 
-      # shell: vim -E -s -c "source {{ home_dir }}/.vimrc" +PluginInstall +qall -V 
-      # 当插件较多时，这部分会比较慢
-      shell: vim +PluginInstall +qall 
-      ignore_errors: yes
-      tags: plugin 
