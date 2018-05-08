@@ -55,5 +55,11 @@
         path: "{{ home_dir }}/go/go_pkg.tar"
         state: absent 
       tags: vimgo 
-    - name: 安装dep包管理器
-      command: go get -u github.com/golang/dep/cmd/dep 
+    # - name: 安装dep包管理器
+    #   command: go get -u github.com/golang/dep/cmd/dep 
+    - name: 安装glide包管理器 
+      yum: 
+        name: glide 
+        state: latest
+    # - name: windows环境下(包括vmware虚拟机)，需要修改换行配置
+    #   command: "git config --global core.autocrlf true"
