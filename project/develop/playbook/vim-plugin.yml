@@ -20,21 +20,20 @@
         path: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
         state: absent 
       tags: ycm 
-    - name: 安装YouCompleteMe(依赖golang)
-      command: python3 ./install.py --gocode-completer --tern-completer # 支持c/c++/c#需要添加参数--clang-completer 
+    - name: 安装YouCompleteMe(依赖golang, node) # 该shell无法获取go的path
+      shell: /bin/zsh -l -c "source {{ home_dir }}/.zshrc && python3 ./install.py --gocode-completer --tern-completer" # 支持c/c++/c#需要添加参数--clang-completer 
       args:
         chdir: "{{ home_dir }}/.vim/bundle/YouCompleteMe"
       tags: ycm 
-    - name: 安装vim中的go插件 
-      # 需要zsh的支持
-      shell: /bin/zsh -l -c "vim +GoInstallBinaries +qall"
-      args:
-        chdir: "{{ home_dir }}"
+    - name: 安装vim插件 
+      # 当插件较多时，这部分会比较慢
+      shell: /bin/zsh -l -c "source {{ home_dir }}/.zshrc && vim -c 'source {{ home_dir }}/.vimrc' +PluginInstall +qall"
       ignore_errors: yes
       tags: plugin 
-    - name: 安装vim插件 
-      # shell: vim -E -s -c "source {{ home_dir }}/.vimrc" +PluginInstall +qall -V 
-      # 当插件较多时，这部分会比较慢
-      shell: vim +PluginInstall +qall 
+    - name: 安装vim中的go插件 
+      # 需要zsh的支持
+      shell: /bin/zsh -l -c "source {{ home_dir }}/.zshrc && vim -c 'source {{ home_dir }}/.vimrc' +GoInstallBinaries +qall"
+      args:
+        chdir: "{{ home_dir }}"
       ignore_errors: yes
       tags: plugin 

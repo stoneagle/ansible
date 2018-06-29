@@ -11,19 +11,15 @@
         name: zsh
         state: present
       tags: install 
-    - name: 从github获取个人配置
-      git:
-        repo: "{{ tool_git_href }}" 
-        dest: "{{ home_tool_dir }}" 
-        clone: no 
-        update: yes
-      tags: github
     - name: 检查zsh是否存在 
       yum:
         name: zsh
         state: present
       tags: file 
     - name: 下载oh-my-zsh
+      become: yes
+      become_user: "{{ owner }}"
+      become_method: sudo
       shell: sh "{{ home_tool_dir }}/oh-my-zsh-install.sh" 
       tags: file 
     - name: 删除初始的.zshrc文件
@@ -56,26 +52,3 @@
         clone: yes 
         update: yes
       tags: github
-    - name: 从github获取fzf(需要切换成zsh)
-      git:
-        repo: "https://github.com/junegunn/fzf.git" 
-        dest: "{{ home_dir }}/.fzf" 
-        clone: yes 
-        update: yes
-      tags: github
-    - name: 安装fzf 
-      command: "{{ home_dir }}/.fzf/install --all" 
-      tags: fzf 
-    - name: 删除初始的key-bindings.zsh文件
-      file:
-        path: "{{ home_dir }}/.fzf/shell/key-bindings.zsh"
-        state: absent 
-      tags: fzf 
-    - name: 新增key-bindings.zsh的软链
-      file:
-        src: "{{ home_tool_dir }}/key-bindings.zsh"
-        dest: "{{ home_dir }}/.fzf/shell/key-bindings.zsh"
-        owner: "{{ owner }}"
-        group: "{{ owner_group }}" 
-        state: link 
-      tags: fzf 

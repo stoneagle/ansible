@@ -9,8 +9,8 @@ tool_git_href: https://github.com/stoneagle/personal_tool_conf.git
 vundle_git_href: https://github.com/VundleVim/Vundle.vim.git
 go_git_href: https://go.googlesource.com/go 
 
-chsh_password: xxx 
+chsh_password: A20138502@wzy
 
-shadows_server: 127.0.0.1 
+shadows_server: 45.76.146.115 
 shadows_port: 8888
-shadows_password: xxx 
+shadows_password: a20138502
