@@ -7,9 +7,10 @@
       yum: 
         name: ack,htop,iotop,iftop,sysstat,mlocate,bash-completion,vim 
         state: latest
-    - name: 安装系统组件
+    - name: 安装相关插件
       yum:
-        name: gcc,wget,libzip,bzip2,git,unzip,cscope,gitflow
+        # name: m2crypto,epel-release,gcc,python34,python34-devel,python,python-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
+        name: m2crypto,epel-release,gcc,python34,python34-devel,python34-setuptools,ncurses-devel,wget,libzip,bzip2,git,unzip,cscope,gitflow,cmake,gcc-c++,mariadb,ctags
         state: latest
     - name: 调整服务器配置
       command: tuned-adm profile virtual-guest
@@ -46,5 +47,22 @@
         name: sshd 
         state: restarted 
       tags: banner
+    - name: 从github获取personal_conf 
+      git:
+        repo: "{{ tool_git_href }}" 
+        dest: "{{ home_tool_dir }}" 
+        clone: yes 
+        update: yes
+      tags: github
+    - name: 复制.gitconfig文件 
+      copy: 
+        src: "{{ home_tool_dir }}/.gitconfig" 
+        dest: "{{ home_dir }}" 
+    - name: 复制locale文件 
+      copy: 
+        src: "{{ home_tool_dir }}/locale.conf"
+        dest: "/etc" 
+    - name: 安装pip3
+      command: easy_install-3.4 pip 
   become: yes
   gather_facts: no
