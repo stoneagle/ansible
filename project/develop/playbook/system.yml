@@ -55,9 +55,12 @@
         update: yes
       tags: github
     - name: 复制.gitconfig文件 
-      copy: 
+      file: 
         src: "{{ home_tool_dir }}/.gitconfig" 
         dest: "{{ home_dir }}" 
+        owner: "{{ owner }}"
+        group: "{{ owner_group }}" 
+        state: link 
     - name: 复制locale文件 
       copy: 
         src: "{{ home_tool_dir }}/locale.conf"
