@@ -4,14 +4,43 @@
     - ../inventory/vars/{{ group }}
   remote_user: wuzhongyang
   tasks:
-    - name: 安装tmux 
+    - name: 下载tmux的压缩包
+      get_url: 
+        url: https://github.com/tmux/tmux/releases/download/2.3/tmux-2.3.tar.gz 
+        dest: "{{ home_src_dir }}"
+      tags: download
+    - name: 解压缩tmux的压缩包 
+      unarchive: 
+        src: "{{ home_src_dir }}/tmux-2.3.tar.gz"
+        dest: "{{ home_src_dir }}"
+        remote_src: true
+      tags: file
+    - name: 删除tmux的压缩包 
+      file:
+        path: "{{ home_src_dir }}/tmux-2.3.tar.gz"
+        state: absent
+      tags : file
+    - name: 配置tmux相关文件
       become: yes
-      become_user: root
+      become_user: root 
       become_method: sudo
-      yum:
-        name: tmux 
-        state: latest 
-      tags: install 
+      command: ./configure
+      args:
+        chdir: "{{ home_src_dir }}/tmux-2.3"
+    - name: 编译tmux
+      become: yes
+      become_user: root 
+      become_method: sudo
+      command: make 
+      args:
+        chdir: "{{ home_src_dir }}/tmux-2.3"
+    - name: 安装tmux
+      become: yes
+      become_user: root 
+      become_method: sudo
+      command: make install
+      args:
+        chdir: "{{ home_src_dir }}/tmux-2.3"
     - name: 删除初始化的tmux配置文件 
       file:
         path: "{{ home_dir }}/.tmux.conf"
@@ -25,4 +54,10 @@
         group: "{{ owner_group }}" 
         state: link 
       tags: file
-
+    - name: 从github获取tmux-resurrect
+      git:
+        repo: "https://github.com/tmux-plugins/tmux-resurrect" 
+        dest: "{{ home_src_dir }}/tmux-resurrect" 
+        clone: yes 
+        update: yes
+      tags: restore
