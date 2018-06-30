@@ -12,13 +12,6 @@
         name: tmux 
         state: latest 
       tags: install 
-    - name: 从github获取personal_conf 
-      git:
-        repo: "{{ tool_git_href }}" 
-        dest: "{{ home_tool_dir }}" 
-        clone: no 
-        update: yes
-      tags: github
     - name: 删除初始化的tmux配置文件 
       file:
         path: "{{ home_dir }}/.tmux.conf"

@@ -3,6 +3,19 @@
   vars_files:
     - "../inventory/vars/{{ group }}"
   tasks:
+    # 个人k8s环境配置
+    # - name: 初始化docker目录
+    #   file: 
+    #     path: "/root/.docker" 
+    #     state: directory
+    # - name: 根据模板生成docker配置
+    #   template: 
+    #     src: ../templates/docker_config.j2 
+    #     dest: /root/.docker/config.json
+    # - name: 拉取rhel7的镜像
+    #   command: "docker pull {{ docker_registry }}/rhel7/pod-infrastructure"
+    # - name: 拉取hyperkube镜像 
+    #   command: "docker pull {{ docker_registry }}/google_containers/hyperkube:{{ kube_version }}"
     - name: 初始化k8s根目录
       file: 
         path: "{{ kube_home }}" 
