@@ -1,4 +1,6 @@
 init:
+	sudo systemctl disable firewalld && \
+	sudo systemctl stop firewalld && \
 	sudo yum install -y ansible wget && \
 	cd /etc/yum.repos.d && mkdir repo_bak && \
 	mv *.repo repo_bak/ && wget http://mirrors.aliyun.com/repo/Centos-7.repo && \
