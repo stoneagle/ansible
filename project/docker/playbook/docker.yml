@@ -28,7 +28,6 @@
       yum: 
         name: docker-ce
         state: latest
-
     - name: 复制docker系统服务
       copy: 
         src: ../files/system/docker.service.d 
