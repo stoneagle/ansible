@@ -4,6 +4,13 @@
     - ../inventory/vars/{{ group }}
   remote_user: wuzhongyang
   tasks:
+    - name: 复制.NERDTreeBookmarks文件 
+      file: 
+        src: "{{ home_tool_dir }}/.NERDTreeBookmarks" 
+        dest: "{{ home_dir }}" 
+        owner: "{{ owner }}"
+        group: "{{ owner_group }}" 
+        state: link
     - name: 拷贝YouCompleteMe
       copy: 
         src: ../release/YouCompleteMe.tar
