@@ -9,8 +9,7 @@
         state: latest
     - name: 安装相关插件
       yum:
-        # name: m2crypto,epel-release,gcc,python34,python34-devel,python,python-devel,ncurses-devel,wget,libzip,bzip2,git,unzip,gitflow
-        name: m2crypto,epel-release,gcc,python34,python34-devel,python34-setuptools,ncurses-devel,wget,libzip,bzip2,git,unzip,cscope,gitflow,cmake,gcc-c++,mariadb,ctags
+        name: m2crypto,epel-release,gcc,python34,python34-devel,python34-setuptools,ncurses-devel,wget,libzip,bzip2,git,unzip,cscope,gitflow,cmake,gcc-c++,mariadb,ctags,libevent-devel
         state: latest
     - name: 调整服务器配置
       command: tuned-adm profile virtual-guest
@@ -57,7 +56,7 @@
     - name: 复制.gitconfig文件 
       file: 
         src: "{{ home_tool_dir }}/.gitconfig" 
-        dest: "{{ home_dir }}" 
+        dest: "{{ home_dir }}/.gitconfig" 
         owner: "{{ owner }}"
         group: "{{ owner_group }}" 
         state: link 
@@ -65,6 +64,13 @@
       copy: 
         src: "{{ home_tool_dir }}/locale.conf"
         dest: "/etc" 
+    - name: 复制.bash_profile文件 
+      file: 
+        src: "{{ home_tool_dir }}/.bash_profile" 
+        dest: "{{ home_dir }}/.bash_profile" 
+        owner: "{{ owner }}"
+        group: "{{ owner_group }}" 
+        state: link
     - name: 安装pip3
       command: easy_install-3.4 pip 
   become: yes

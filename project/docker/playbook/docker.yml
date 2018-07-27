@@ -8,10 +8,10 @@
     #   copy: 
     #     src: ../files/Docker.repo 
     #     dest: /etc/yum.repos.d/
-    - name: 安装docker-engine
-      yum: 
-        name: docker-engine 
-        state: latest
+    # - name: 安装docker-engine
+    #   yum: 
+    #     name: docker-engine 
+    #     state: latest
     - name: 安装相关组件
       yum:
         name: yum-utils,device-mapper-persistent-data,lvm2 
