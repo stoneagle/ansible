@@ -3,15 +3,6 @@
   vars_files:
     - ../inventory/vars/{{ group }}
   tasks:
-    # 国内被屏蔽
-    # - name: 复制docker的repo 
-    #   copy: 
-    #     src: ../files/Docker.repo 
-    #     dest: /etc/yum.repos.d/
-    # - name: 安装docker-engine
-    #   yum: 
-    #     name: docker-engine 
-    #     state: latest
     - name: 安装相关组件
       yum:
         name: yum-utils,device-mapper-persistent-data,lvm2 

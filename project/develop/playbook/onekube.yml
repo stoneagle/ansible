@@ -3,6 +3,7 @@
   vars_files:
     - ../inventory/vars/{{ group }}
   remote_user: wuzhongyang
+  tasks:
     - name: 关闭防火墙 
       service: 
         name: firewalld 
@@ -12,67 +13,176 @@
         name: firewalld 
         enabled: no 
     - name: 关闭swap内存 
-      command: swapoff -a 
+      become: yes
+      become_user: root 
+      become_method: sudo
+      shell: source {{ home_dir }}/.bash_profile && swapoff -a 
+      args:
+        executable: /bin/bash
     - name: 注释swap自动挂载 
+      become: yes
+      become_user: root 
+      become_method: sudo
       lineinfile:
         dest: /etc/fstab
         state: absent 
         line: "/dev/mapper/centos-swap swap                    swap    defaults        0 0"
     - name: 去除selinux
+      become: yes
+      become_user: root 
+      become_method: sudo
       lineinfile:
         dest: /etc/sysconfig/selinux
         state: absent 
         line: "SELINUX=enforcing"
     - name: 关闭selinux
+      become: yes
+      become_user: root 
+      become_method: sudo
       lineinfile:
         dest: /etc/sysconfig/selinux
         state: present 
         line: "SELINUX=disabled"
-    - name: 调整k8s内核参数 
-      lineinfile:
-        dest: /etc/sysctl.d/k8s.conf
-        state: present 
-        line: "net.bridge.bridge-nf-call-ip6tables = 1 \n net.bridge.bridge-nf-call-iptables = 1"
     - name: 修改sshd 
+      become: yes
+      become_user: root 
+      become_method: sudo
       lineinfile:
         dest: /etc/ssh/sshd_config
         state: present 
         line: "ClientAliveInterval 10"
     - name: 修改sshd 
+      become: yes
+      become_user: root 
+      become_method: sudo
       lineinfile:
         dest: /etc/ssh/sshd_config
         state: present 
         line: "TCPKeepAlive yes"
     - name: 重启sshd 
+      become: yes
+      become_user: root 
+      become_method: sudo
       service: 
         name: firewalld 
-        state: restart 
-
-    - name: 复制k8s的repo 
+        state: restarted
+    - name: 复制k8s的repo(国内aliyun源)
+      become: yes
+      become_user: root 
+      become_method: sudo
       copy: 
         src: ../files/system/kubernetes.repo 
         dest: /etc/yum.repos.d/
-    - name: 安装相关组件(yum需要翻墙)
+    - name: 安装相关组件
+      become: yes
+      become_user: root 
+      become_method: sudo
       yum:
         name: kubeadm,kubelet,kubectl 
         state: latest
     - name: 启用kubelet
+      become: yes
+      become_user: root 
+      become_method: sudo
       service: 
         name: kubelet 
         enabled: yes
     - name: 启动kubelet
+      become: yes
+      become_user: root 
+      become_method: sudo
       service: 
         name: kubelet 
         state: started
+    - name: pull-kube-images
+      shell: docker pull {{ google_prefix }}.kube-apiserver-amd64:v{{ kube_version }} &&
+        docker pull {{ google_prefix }}.kube-controller-manager-amd64:v{{ kube_version }} &&
+        docker pull {{ google_prefix }}.kube-scheduler-amd64:v{{ kube_version }} &&
+        docker pull {{ google_prefix }}.kube-proxy-amd64:v{{ kube_version }} &&
+        docker pull {{ google_prefix }}.pause:{{ pause_version }} &&
+        docker pull {{ google_prefix }}.etcd-amd64:{{ etcd_version }} &&
+        docker pull {{ google_prefix }}.coredns:{{ coredns_version }} 
+      args:
+        executable: /bin/bash
+    - name: tag-kube-images
+      shell: docker tag {{ google_prefix }}.kube-apiserver-amd64:v{{ kube_version }} {{ kube_prefix }}/kube-apiserver-amd64:v{{ kube_version }} &&
+        docker tag {{ google_prefix }}.kube-controller-manager-amd64:v{{ kube_version }} {{ kube_prefix }}/kube-controller-manager-amd64:v{{ kube_version }} &&
+        docker tag {{ google_prefix }}.kube-scheduler-amd64:v{{ kube_version }} {{ kube_prefix }}/kube-scheduler-amd64:v{{ kube_version }} &&
+        docker tag {{ google_prefix }}.kube-proxy-amd64:v{{ kube_version }} {{ kube_prefix }}/kube-proxy-amd64:v{{ kube_version }} &&
+        docker tag {{ google_prefix }}.pause:{{ pause_version }} {{ kube_prefix }}/pause:{{ pause_version }} &&
+        docker tag {{ google_prefix }}.etcd-amd64:{{ etcd_version }} {{ kube_prefix }}/etcd-amd64:{{ etcd_version }} &&
+        docker tag {{ google_prefix }}.coredns:{{ coredns_version }} {{ kube_prefix }}/coredns:{{ coredns_version }}
+      args:
+        executable: /bin/bash
+    - name: remove-inboard-kube-images
+      shell: docker rmi {{ google_prefix }}.kube-apiserver-amd64:v{{ kube_version }} &&
+        docker rmi {{ google_prefix }}.kube-controller-manager-amd64:v{{ kube_version }} &&
+        docker rmi {{ google_prefix }}.kube-scheduler-amd64:v{{ kube_version }} &&
+        docker rmi {{ google_prefix }}.kube-proxy-amd64:v{{ kube_version }} &&
+        docker rmi {{ google_prefix }}.pause:{{ pause_version }} &&
+        docker rmi {{ google_prefix }}.etcd-amd64:{{ etcd_version }} &&
+        docker rmi {{ google_prefix }}.coredns:{{ coredns_version }} 
+      args:
+        executable: /bin/bash
+         
+    # # 拉取本地镜像后就不需要代理
+    # - name: 复制docker的proxy配置
+    #   become: yes
+    #   become_user: root 
+    #   become_method: sudo
+    #   copy: 
+    #     src: ../files/docker.proxy.conf
+    #     dest: /etc/systemd/system/docker.service.d/https-proxy.conf
+    # - name: 重启系统服务
+    #   become: yes
+    #   become_user: root 
+    #   become_method: sudo
+    #   command: systemctl daemon-reload
+    # - name: 重启docker
+    #   become: yes
+    #   become_user: root 
+    #   become_method: sudo
+    #   service: 
+    #     name: docker 
+    #     state: started
+         
     - name: 部署k8s
-      command: "kubeadm init --kubernetes-version=v1.9.2 --pod-network-cidr=10.244.0.0/16" 
+      become: yes
+      become_user: root 
+      become_method: sudo
+      shell: kubeadm init --kubernetes-version=v{{ kube_version }} --pod-network-cidr=10.244.0.0/16 --feature-gates CoreDNS=true
+      args:
+        executable: /bin/bash
     - name: 处理kubectl
-      command: "mkdir -p $HOME/.kube"
-    - name: 处理kubectl
-      command: "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
-    - name: 处理kubectl
-      command: "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
-    - name: 安装network addon
-      command: "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml"
+      shell: mkdir -p {{ home_dir }}/.kube
+      args:
+        executable: /bin/bash
+    - name: 复制k8s的admin.conf
+      become: yes
+      become_user: root 
+      become_method: sudo
+      shell: cp -i /etc/kubernetes/admin.conf {{ home_dir }}/.kube/config
+      args:
+        executable: /bin/bash
+    - name: 更改admin-conf的权限 
+      become: yes
+      become_user: root 
+      become_method: sudo
+      file:
+        path: "{{ home_dir }}/.kube/config"
+        owner: "{{ owner }}"
+        group: "{{ owner_group }}" 
+        mode: 0644
+    - name: 安装network
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml
+      args:
+        executable: /bin/bash
     - name: 允许master节点调度
-      command: "kubectl taint nodes --all node-role.kubernetes.io/master-"
+      shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+      args:
+        executable: /bin/bash
+    # - name: 调整k8s内核参数 
+    #   lineinfile:
+    #     dest: /etc/sysctl.d/k8s.conf
+    #     state: present 
+    #     line: "net.bridge.bridge-nf-call-ip5tables = 1 \n net.bridge.bridge-nf-call-iptables = 1"

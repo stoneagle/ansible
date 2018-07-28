@@ -30,5 +30,5 @@ vmware:
 	ansible-playbook ./project/develop/playbook/vim-plugin.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/fzf.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/tmux.yml -i ./hosts -e "group=develop" -K -k && \
-	ansible-playbook ./project/docker/playbook/docker.yml -i ./hosts -e "group=develop" -K -k && \
-	sudo gpasswd -a $(USERNAME) docker
+	ansible-playbook ./project/develop/playbook/docker.yml -i ./hosts -e "group=develop" -K -k && \
+	ansible-playbook ./project/develop/playbook/onekube.yml -i ./hosts -e "group=develop" -K -k
