@@ -27,25 +27,3 @@
         path: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
         state: absent 
       tags: ycm 
-    # 以下三项改为makefile执行
-    # - name: 安装YouCompleteMe(依赖golang, node)
-    #   # 支持c/c++/c#需要添加参数--clang-completer 
-    #   shell: source {{ home_dir }}/.bash_profile && python3 ./install.py --gocode-completer --tern-completer --clang-completer 
-    #   args:
-    #     chdir: "{{ home_dir }}/.vim/bundle/YouCompleteMe"
-    #     executable: /bin/bash
-    #   tags: ycm 
-    # - name: 安装vim插件 
-    #   shell: source {{ home_dir }}/.bash_profile && vim -c 'source {{ home_dir }}/.vimrc' +PluginInstall +qall
-    #   ignore_errors: yes
-    #   args:
-    #     executable: /bin/bash
-    #   tags: plugin 
-    # - name: 安装vim中的go插件 
-    #   # 需要zsh的支持
-    #   shell: source {{ home_dir }}/.bash_profile && vim -c 'source {{ home_dir }}/.vimrc' +GoInstallBinaries +qall
-    #   args:
-    #     chdir: "{{ home_dir }}"
-    #     executable: /bin/bash
-    #   ignore_errors: yes
-    #   tags: plugin 

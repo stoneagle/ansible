@@ -50,8 +50,11 @@
       git:
         repo: "{{ tool_git_href }}" 
         dest: "{{ home_tool_dir }}" 
+        key_file: "{{ home_dir }}/.ssh/id_rsa"
+        accept_hostkey: yes
         clone: yes 
         update: yes
+      become_user: "{{ owner }}"
       tags: github
     - name: 复制.gitconfig文件 
       file: 
@@ -64,6 +67,10 @@
       copy: 
         src: "{{ home_tool_dir }}/locale.conf"
         dest: "/etc" 
+    - name: 删除原版.bash_profile文件 
+      file:
+        path: "{{ home_dir }}/.bash_profile"
+        state: absent
     - name: 复制.bash_profile文件 
       file: 
         src: "{{ home_tool_dir }}/.bash_profile" 
