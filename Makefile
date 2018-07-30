@@ -34,8 +34,13 @@ vmware:
 	ansible-playbook ./project/develop/playbook/fzf.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/tmux.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/docker.yml -i ./hosts -e "group=develop" -K -k && \
-	ansible-playbook ./project/develop/playbook/docker.yml -i ./hosts -e "group=develop" -K -k && \
-	ansible-playbook ./project/develop/playbook/onekube.yml -i ./hosts -e "group=develop" -K -k
+	ansible-playbook ./project/develop/playbook/docker.yml -i ./hosts -e "group=develop" -K -k
+
+k8s-dev:
+	ansible-playbook ./project/k8s-dev/playbook/system.yml -i ./hosts -e "group=master" -K -k && \
+	ansible-playbook ./project/k8s-dev/playbook/docker.yml -i ./hosts -e "group=master" -K -k && \
+	ansible-playbook ./project/k8s-dev/playbook/onekube.yml -i ./hosts -e "group=master" -K -k && \
+	ansible-playbook ./project/k8s-dev/playbook/local.yml -i ./hosts -e "group=master" -K -k
 
 plugin:
 	vim +PluginInstall +qall && \

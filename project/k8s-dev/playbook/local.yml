@@ -1,0 +1,15 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  remote_user: wuzhongyang
+  tasks:
+    - name: 处理本地kubectl
+      shell: mkdir -p {{ home_dir }}/.kube
+      args:
+        executable: /bin/bash
+    - name: 复制k8s的admin.conf
+      fetch:
+        src: "{{ home_dir }}/.kube/config"
+        dest: "{{ home_dir }}/.kube/config"
+        flat: yes

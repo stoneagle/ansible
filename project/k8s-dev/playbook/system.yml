@@ -1,0 +1,61 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    # - name: 更新yum工具至最新版本
+    #   yum: 
+    #     name: '*'
+    #     state: latest 
+    #     exclude: kernel*,centos-release*
+    - name: 安装常用软件，系统工具
+      yum: 
+        name: ack,htop,sysstat,mlocate,bash-completion,vim 
+        state: latest
+    - name: 安装相关组件
+      yum:
+        name: yum-utils,device-mapper-persistent-data,lvm2 
+        state: latest
+    - name: 关闭防火墙 
+      service: 
+        name: firewalld 
+        state: stopped 
+    - name: 下线防火墙 
+      service: 
+        name: firewalld 
+        enabled: no 
+    - name: 关闭swap内存 
+      shell: swapoff -a 
+      args:
+        executable: /bin/bash
+    - name: 注释swap自动挂载 
+      lineinfile:
+        dest: /etc/fstab
+        state: absent 
+        line: "/dev/mapper/centos-swap swap                    swap    defaults        0 0"
+    - name: 去除selinux
+      lineinfile:
+        dest: /etc/sysconfig/selinux
+        state: absent 
+        line: "SELINUX=enforcing"
+    - name: 关闭selinux
+      lineinfile:
+        dest: /etc/sysconfig/selinux
+        state: present 
+        line: "SELINUX=disabled"
+    - name: 修改sshd 
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: present 
+        line: "ClientAliveInterval 10"
+    - name: 修改sshd 
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        state: present 
+        line: "TCPKeepAlive yes"
+    - name: 重启sshd 
+      service: 
+        name: firewalld 
+        state: restarted
+  become: yes
+  gather_facts: no

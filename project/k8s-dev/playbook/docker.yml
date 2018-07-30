@@ -3,22 +3,18 @@
   vars_files:
     - ../inventory/vars/{{ group }}
   tasks:
-    - name: 安装相关组件
-      yum:
-        name: yum-utils,device-mapper-persistent-data,lvm2 
-        state: latest
-    - name: 安装阿里docker源
-      shell: "yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo" 
-      args:
-        executable: /bin/zsh
-    - name: 替换docker源配置 
-      shell: "sed -i 's+download-stage.docker.com+mirrors.tuna.tsinghua.edu.cn/docker-ce+' /etc/yum.repos.d/docker-ce.repo" 
-      args:
-        executable: /bin/zsh
-    - name: 安装docker-ce
-      yum: 
-        name: docker-ce
-        state: present
+    # - name: 安装阿里docker源
+    #   shell: "yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo" 
+    #   args:
+    #     executable: /bin/bash
+    # - name: 清楚docker-selinux 
+    #   shell: yum erase docker-engine-selinux 
+    #   args:
+    #     executable: /bin/bash
+    # - name: 安装docker-17.03
+    #   shell: yum install -y --setopt=obsoletes=0 docker-ce-17.03.2.ce-1.el7.centos docker-ce-selinux-17.03.2.ce-1.el7.centos
+    #   args:
+    #     executable: /bin/bash
     - name: 复制docker系统服务
       copy: 
         src: ../files/system/docker.service.d 
@@ -48,14 +44,6 @@
       service: 
         name: docker 
         state: started
-    - name: 下载docker-compose
-      shell: "curl -L https://get.daocloud.io/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose" 
-      args:
-        executable: /bin/zsh
-    - name: 更新docker-compose命令权限
-      file: 
-        path: /usr/bin/docker-compose 
-        mode: 0755
     - name: 确保 "docker" group存在
       group:
         name: docker 
@@ -67,9 +55,9 @@
     - name: 添加daocloud加速器 
       shell: "curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://1401b515.m.daocloud.io" 
       args:
-        executable: /bin/zsh
+        executable: /bin/bash
     - name: 重启docker
-      service: 
+      service:
         name: docker 
         state: restarted
   become: yes

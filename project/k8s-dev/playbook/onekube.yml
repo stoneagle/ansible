@@ -2,95 +2,20 @@
 - hosts: "{{ group }}"
   vars_files:
     - ../inventory/vars/{{ group }}
-  remote_user: wuzhongyang
   tasks:
-    - name: 关闭防火墙 
-      service: 
-        name: firewalld 
-        state: stopped 
-    - name: 下线防火墙 
-      service: 
-        name: firewalld 
-        enabled: no 
-    - name: 关闭swap内存 
-      become: yes
-      become_user: root 
-      become_method: sudo
-      shell: source {{ home_dir }}/.bash_profile && swapoff -a 
-      args:
-        executable: /bin/bash
-    - name: 注释swap自动挂载 
-      become: yes
-      become_user: root 
-      become_method: sudo
-      lineinfile:
-        dest: /etc/fstab
-        state: absent 
-        line: "/dev/mapper/centos-swap swap                    swap    defaults        0 0"
-    - name: 去除selinux
-      become: yes
-      become_user: root 
-      become_method: sudo
-      lineinfile:
-        dest: /etc/sysconfig/selinux
-        state: absent 
-        line: "SELINUX=enforcing"
-    - name: 关闭selinux
-      become: yes
-      become_user: root 
-      become_method: sudo
-      lineinfile:
-        dest: /etc/sysconfig/selinux
-        state: present 
-        line: "SELINUX=disabled"
-    - name: 修改sshd 
-      become: yes
-      become_user: root 
-      become_method: sudo
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        state: present 
-        line: "ClientAliveInterval 10"
-    - name: 修改sshd 
-      become: yes
-      become_user: root 
-      become_method: sudo
-      lineinfile:
-        dest: /etc/ssh/sshd_config
-        state: present 
-        line: "TCPKeepAlive yes"
-    - name: 重启sshd 
-      become: yes
-      become_user: root 
-      become_method: sudo
-      service: 
-        name: firewalld 
-        state: restarted
     - name: 复制k8s的repo(国内aliyun源)
-      become: yes
-      become_user: root 
-      become_method: sudo
       copy: 
         src: ../files/system/kubernetes.repo 
         dest: /etc/yum.repos.d/
     - name: 安装相关组件
-      become: yes
-      become_user: root 
-      become_method: sudo
       yum:
         name: kubeadm,kubelet,kubectl 
         state: latest
     - name: 启用kubelet
-      become: yes
-      become_user: root 
-      become_method: sudo
       service: 
         name: kubelet 
         enabled: yes
     - name: 启动kubelet
-      become: yes
-      become_user: root 
-      become_method: sudo
       service: 
         name: kubelet 
         state: started
@@ -125,10 +50,15 @@
       args:
         executable: /bin/bash
     - name: 部署k8s
-      become: yes
-      become_user: root 
-      become_method: sudo
-      shell: kubeadm init --kubernetes-version=v{{ kube_version }} --pod-network-cidr=10.244.0.0/16 --feature-gates CoreDNS=true
+      shell: kubeadm init --kubernetes-version=v{{ kube_version }} --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address={{ master_ip }} --feature-gates CoreDNS=true
+      args:
+        executable: /bin/bash
+    - name: 处理root的kubectl
+      shell: mkdir -p /root/.kube
+      args:
+        executable: /bin/bash
+    - name: 复制k8s的admin.conf
+      shell: cp -i /etc/kubernetes/admin.conf /root/.kube/config
       args:
         executable: /bin/bash
     - name: 处理kubectl
@@ -136,16 +66,10 @@
       args:
         executable: /bin/bash
     - name: 复制k8s的admin.conf
-      become: yes
-      become_user: root 
-      become_method: sudo
       shell: cp -i /etc/kubernetes/admin.conf {{ home_dir }}/.kube/config
       args:
         executable: /bin/bash
     - name: 更改admin-conf的权限 
-      become: yes
-      become_user: root 
-      become_method: sudo
       file:
         path: "{{ home_dir }}/.kube/config"
         owner: "{{ owner }}"
@@ -159,8 +83,5 @@
       shell: kubectl taint nodes --all node-role.kubernetes.io/master-
       args:
         executable: /bin/bash
-    # - name: 调整k8s内核参数 
-    #   lineinfile:
-    #     dest: /etc/sysctl.d/k8s.conf
-    #     state: present 
-    #     line: "net.bridge.bridge-nf-call-ip5tables = 1 \n net.bridge.bridge-nf-call-iptables = 1"
+  become: yes
+  gather_facts: no

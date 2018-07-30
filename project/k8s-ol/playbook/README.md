@@ -67,7 +67,5 @@
 1. selinux.yml
     * selinux配置(涉及kubelet，docker，flanneld等)
 
-
-
 1. 弃用pantheon
 
