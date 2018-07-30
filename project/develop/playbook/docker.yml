@@ -64,5 +64,13 @@
       command: gpasswd -a {{ owner }} docker
     - name: 初始化network 
       command: docker network create {{ owner }}
+    - name: 添加daocloud加速器 
+      shell: "curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://1401b515.m.daocloud.io" 
+      args:
+        executable: /bin/zsh
+    - name: 重启docker
+      service: 
+        name: docker 
+        state: restarted
   become: yes
   gather_facts: no

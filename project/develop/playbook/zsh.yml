@@ -17,7 +17,9 @@
         state: present
       tags: file 
     - name: 下载oh-my-zsh
-      shell: sh "{{ home_tool_dir }}/oh-my-zsh-install.sh" 
+      shell: /bin/bash "{{ home_tool_dir }}/oh-my-zsh-install.sh" 
+      args:
+        executable: /bin/bash
       tags: file 
     - name: 删除初始的.zshrc文件
       file:

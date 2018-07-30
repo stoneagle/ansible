@@ -4,26 +4,7 @@
     - ../inventory/vars/{{ group }}
   remote_user: wuzhongyang
   tasks:
-    - name: 复制.NERDTreeBookmarks文件 
-      file: 
-        src: "{{ home_tool_dir }}/.NERDTreeBookmarks" 
-        dest: "{{ home_dir }}/.NERDTreeBookmarks" 
-        owner: "{{ owner }}"
-        group: "{{ owner_group }}" 
-        state: link
-    - name: 拷贝YouCompleteMe
-      copy: 
-        src: ../release/YouCompleteMe.tar
-        dest: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
-      tags: ycm 
-    - name: 解压缩YouCompleteMe
-      unarchive: 
-        src: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
-        dest: "{{ home_dir }}/.vim/bundle"
-        remote_src: true
-      tags: ycm 
-    - name: 删除YCM的tar包 
-      file:
-        path: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
-        state: absent 
-      tags: ycm 
+    - name: 安装YCM 
+      shell: source {{ home_dir }}/.bash_profile && python3 {{ home_dir }}/.vim/bundle/YouCompleteMe/install.py --gocode-completer --tern-completer 
+      args:
+        executable: /bin/bash

@@ -1,0 +1,78 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    - name: 从github获取basic
+      git:
+        repo: "{{ basic_git_href }}" 
+        dest: "{{ home_basic_dir }}" 
+        key_file: "{{ home_dir }}/.ssh/id_rsa"
+        accept_hostkey: yes
+        clone: yes 
+        update: yes
+      become_user: "{{ owner }}"
+    - name: 初始化machine-ip
+      become: yes
+      become_user: root 
+      become_method: sudo
+      shell: /bin/bash ./config/machine-ip.sh 
+      args:
+        chdir: "{{ home_basic_dir }}"
+        executable: /bin/zsh
+    - name: 更新gog配置权限 
+      become: yes
+      become_user: root 
+      become_method: sudo
+      file:
+        path: "{{ home_basic_dir }}/config/.gogs.app.ini"
+        owner: "{{ owner }}"
+        group: "{{ owner_group }}" 
+        state: file 
+    - name: 初始化.env
+      shell: /bin/bash ./config/swarm-env.sh 
+      args:
+        chdir: "{{ home_basic_dir }}"
+        executable: /bin/zsh
+    - name: 启动database 
+      shell: make run SYSTEM=database UPPARAMS="-d" 
+      args:
+        chdir: "{{ home_basic_dir }}"
+        executable: /bin/zsh
+    - name: 启动envoy
+      shell: make run SYSTEM=envoy UPPARAMS="-d" 
+      args:
+        chdir: "{{ home_basic_dir }}"
+        executable: /bin/zsh
+    - name: 下载drone命令行 
+      shell: "curl -L https://github.com/drone/drone-cli/releases/download/v0.8.5/drone_linux_amd64.tar.gz | tar zx"
+      args:
+        chdir: "{{ home_basic_dir }}"
+        executable: /bin/zsh
+    - name: 安装drone命令行 
+      become: yes
+      become_user: root 
+      become_method: sudo
+      shell: "install -t /usr/local/bin drone"
+      args:
+        chdir: "{{ home_basic_dir }}"
+        executable: /bin/zsh
+    - name: 删除下载的drone
+      file:
+        path: "{{ home_basic_dir }}/drone"
+        state: absent
+    - name: 初始化database的库 
+      shell: make init-mysql-db 
+      args:
+        chdir: "{{ home_basic_dir }}"
+        executable: /bin/zsh
+    - name: 启动gogs
+      shell: make run SYSTEM=gogs UPPARAMS="-d" 
+      args:
+        chdir: "{{ home_basic_dir }}"
+        executable: /bin/zsh
+    - name: 启动drone
+      shell: make run SYSTEM=drone UPPARAMS="-d" 
+      args:
+        chdir: "{{ home_basic_dir }}"
+        executable: /bin/zsh

@@ -124,28 +124,6 @@
         docker rmi {{ google_prefix }}.coredns:{{ coredns_version }} 
       args:
         executable: /bin/bash
-         
-    # # 拉取本地镜像后就不需要代理
-    # - name: 复制docker的proxy配置
-    #   become: yes
-    #   become_user: root 
-    #   become_method: sudo
-    #   copy: 
-    #     src: ../files/docker.proxy.conf
-    #     dest: /etc/systemd/system/docker.service.d/https-proxy.conf
-    # - name: 重启系统服务
-    #   become: yes
-    #   become_user: root 
-    #   become_method: sudo
-    #   command: systemctl daemon-reload
-    # - name: 重启docker
-    #   become: yes
-    #   become_user: root 
-    #   become_method: sudo
-    #   service: 
-    #     name: docker 
-    #     state: started
-         
     - name: 部署k8s
       become: yes
       become_user: root 

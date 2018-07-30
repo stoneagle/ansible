@@ -1,11 +1,11 @@
 USERNAME := $(shell id -nu)
 
 init:
-	sudo make basic && \
+	sudo make prepare && \
 	sudo make vmware-tool
 
 # with sudo
-basic:
+prepare:
 	systemctl disable firewalld && \
 	systemctl stop firewalld && \
 	yum install -y ansible wget && \
@@ -20,7 +20,8 @@ vmware-tool:
 	cd /tmp && tar zxpf /mnt/cdrom/VMwareTools-10.1.15-6627299.tar.gz && umount /dev/cdrom && \
 	cd vmware-tools-distrib && ./vmware-install.pl
 
-# prepare ./hosts ./project/develop/inventory/vars/develop youcompleteme go_pkg.tar
+# prepare ./hosts ./project/develop/inventory/vars/develop youcompleteme
+# youcompleteme支持c/c++/c#需要添加参数--clang-completer
 vmware:
 	ansible-playbook ./project/develop/playbook/system.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/shadowsocket.yml -i ./hosts -e "group=develop" -K -k && \
@@ -29,11 +30,16 @@ vmware:
 	ansible-playbook ./project/develop/playbook/zsh.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/angular.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/vim-plugin.yml -i ./hosts -e "group=develop" -K -k && \
-	# 支持c/c++/c#需要添加参数--clang-completer
-	python3 ~/.vim/bundle/YouCompleteMe/install.py --gocode-completer --tern-completer --clang-completer && \
-	vim +PluginInstall +qall && \
-	vim +GoInstallBinaries +qall && \
+	ansible-playbook ./project/develop/playbook/vim-plugin.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/fzf.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/tmux.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/docker.yml -i ./hosts -e "group=develop" -K -k && \
+	ansible-playbook ./project/develop/playbook/docker.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/onekube.yml -i ./hosts -e "group=develop" -K -k
+
+plugin:
+	vim +PluginInstall +qall && \
+	vim +GoInstallBinaries +qall
+
+basic:
+	ansible-playbook ./project/develop/playbook/basic.yml -i ./hosts -e "group=develop" -K -k
