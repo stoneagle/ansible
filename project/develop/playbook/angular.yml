@@ -19,7 +19,7 @@
         src: "{{ home_src_dir }}/node-v8.11.3-linux-x64.tar.xz"
         dest: "{{ home_src_dir }}"
         remote_src: true
-    - name: 删除yum的压缩包
+    - name: 删除nodejs的压缩包
       file:
         path: "{{ home_src_dir }}/node-v8.11.3-linux-x64.tar.xz"
         state: absent
@@ -33,5 +33,3 @@
         executable: /bin/bash
     - name: 安装angular
       shell: source {{ home_dir }}/.bash_profile && npm install -g @angular/cli
-    # - name: 安装NgAlain
-    #   command: npm install -g @angular-devkit/core @angular-devkit/schematics @schematics/schematics rxjs

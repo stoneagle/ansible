@@ -39,11 +39,6 @@
       args:
         chdir: "{{ home_basic_dir }}"
         executable: /bin/zsh
-    - name: 启动envoy
-      shell: make run SYSTEM=envoy UPPARAMS="-d" 
-      args:
-        chdir: "{{ home_basic_dir }}"
-        executable: /bin/zsh
     - name: 下载drone命令行 
       shell: "curl -L https://github.com/drone/drone-cli/releases/download/v0.8.5/drone_linux_amd64.tar.gz | tar zx"
       args:

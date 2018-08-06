@@ -6,19 +6,19 @@
   tasks:
     - name: 下载go的压缩包
       get_url: 
-        # url: https://storage.googleapis.com/golang/go1.8.linux-amd64.tar.gz
-        url: https://mirrors.nju.edu.cn/golang/go1.8.linux-amd64.tar.gz
+        # url: https://mirrors.nju.edu.cn/golang/go{{ go_version }}.linux-amd64.tar.gz
+        url: https://golangtc.com/static/go/{{ go_version }}/go{{ go_version }}.linux-amd64.tar.gz
         dest: "{{ home_dir }}"
       tags: download
     - name: 解压缩go的压缩包 
       unarchive: 
-        src: "{{ home_dir }}/go1.8.linux-amd64.tar.gz"
+        src: "{{ home_dir }}/go{{ go_version }}.linux-amd64.tar.gz"
         dest: "{{ home_dir }}"
         remote_src: true
       tags: file
     - name: 删除go的压缩包 
       file:
-        path: "{{ home_dir }}/go1.8.linux-amd64.tar.gz"
+        path: "{{ home_dir }}/go{{ go_version }}.linux-amd64.tar.gz"
         state: absent
       tags : file
     - name:  创建go项目的文件夹 
@@ -38,4 +38,20 @@
       file:
         path: "{{ home_vim_dir }}/go/gopkg"
         state: directory
+      tags: vimgo 
+    - name: 拷贝vim-go的相关插件    
+      copy:     
+        src: ../release/go_pkg.tar  
+        dest: "{{ home_dir }}/go/go_pkg.tar"    
+      tags: vimgo   
+    - name: 解压缩gopkg 
+      unarchive:    
+        src: "{{ home_dir }}/go/go_pkg.tar" 
+        dest: "{{ home_dir }}/go"   
+        remote_src: true    
+      tags: vimgo   
+    - name: 删除gopkg的tar包    
+      file: 
+        path: "{{ home_dir }}/go/go_pkg.tar"    
+        state: absent   
       tags: vimgo 

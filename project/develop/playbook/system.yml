@@ -9,7 +9,7 @@
         state: latest
     - name: 安装相关插件
       yum:
-        name: m2crypto,epel-release,gcc,python34,python34-devel,python34-setuptools,ncurses-devel,wget,libzip,bzip2,git,unzip,cscope,gitflow,cmake,gcc-c++,mariadb,ctags,libevent-devel
+        name: m2crypto,epel-release,gcc,python34,python34-devel,python34-setuptools,ncurses-devel,wget,libzip,bzip2,git,unzip,cscope,gitflow,cmake,gcc-c++,mariadb,ctags,libevent-devel,zsh
         state: latest
     - name: 调整服务器配置
       command: tuned-adm profile virtual-guest

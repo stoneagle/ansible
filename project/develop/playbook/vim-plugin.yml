@@ -27,7 +27,3 @@
         path: "{{ home_dir }}/.vim/bundle/YouCompleteMe.tar"
         state: absent 
       tags: ycm 
-    - name: 安装YCM 
-      shell: source {{ home_dir }}/.bash_profile && python3 {{ home_dir }}/.vim/bundle/YouCompleteMe/install.py --gocode-completer --tern-completer 
-      args:
-        executable: /bin/bash

@@ -11,10 +11,6 @@
       shell: "yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo" 
       args:
         executable: /bin/zsh
-    - name: 替换docker源配置 
-      shell: "sed -i 's+download-stage.docker.com+mirrors.tuna.tsinghua.edu.cn/docker-ce+' /etc/yum.repos.d/docker-ce.repo" 
-      args:
-        executable: /bin/zsh
     - name: 安装docker-ce
       yum: 
         name: docker-ce

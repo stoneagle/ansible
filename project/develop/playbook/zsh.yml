@@ -3,23 +3,10 @@
   vars_files:
     - ../inventory/vars/{{ group }}
   tasks:
-    - name: 安装并检查zsh 
-      become: yes
-      become_user: root 
-      become_method: sudo
-      yum:
-        name: zsh
-        state: present
-      tags: install 
     - name: 检查zsh是否存在 
       yum:
         name: zsh
         state: present
-      tags: file 
-    - name: 下载oh-my-zsh
-      shell: /bin/bash "{{ home_tool_dir }}/oh-my-zsh-install.sh" 
-      args:
-        executable: /bin/bash
       tags: file 
     - name: 删除初始的.zshrc文件
       file:
@@ -40,10 +27,6 @@
         chdir: "{{ home_tool_dir }}/autojump"
         executable: /bin/zsh
       tags: install
-    - name: 设置zsh为默认shell
-      # 需要提交密码
-      shell: "chsh -s /bin/zsh <<< {{chsh_password}}"
-      tags: file 
     - name: 从github获取zsh-autosuggestions
       git:
         repo: "git://github.com/zsh-users/zsh-autosuggestions" 

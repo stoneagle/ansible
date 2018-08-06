@@ -10,8 +10,7 @@ tool_git_href: git@github.com:stoneagle/personal_tool_conf.git
 basic_git_href: git@github.com:stoneagle/basic_structure.git 
 vundle_git_href: https://github.com/VundleVim/Vundle.vim.git
 go_git_href: https://go.googlesource.com/go 
-
-chsh_password: # 
+go_version: 1.9.2
 
 shadows_server: 45.76.146.115 
 shadows_port: 8888
