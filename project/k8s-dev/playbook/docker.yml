@@ -3,22 +3,22 @@
   vars_files:
     - ../inventory/vars/{{ group }}
   tasks:
-    # - name: 安装阿里docker源
-    #   shell: "yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo" 
-    #   args:
-    #     executable: /bin/bash
-    # - name: 清楚docker-selinux 
-    #   shell: yum erase docker-engine-selinux 
-    #   args:
-    #     executable: /bin/bash
-    # - name: 安装docker-17.03
-    #   shell: yum install -y --setopt=obsoletes=0 docker-ce-17.03.2.ce-1.el7.centos docker-ce-selinux-17.03.2.ce-1.el7.centos
-    #   args:
-    #     executable: /bin/bash
-    - name: 复制docker系统服务
-      copy: 
-        src: ../files/system/docker.service.d 
-        dest: /etc/systemd/system/
+    - name: 安装阿里docker源
+      shell: "yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo" 
+      args:
+        executable: /bin/bash
+    - name: 清理docker-selinux 
+      shell: yum erase docker-engine-selinux 
+      args:
+        executable: /bin/bash
+    - name: 安装docker-17.03
+      shell: yum install -y --setopt=obsoletes=0 docker-ce-17.03.2.ce-1.el7.centos docker-ce-selinux-17.03.2.ce-1.el7.centos
+      args:
+        executable: /bin/bash
+    - name: 添加daocloud加速器 
+      shell: "curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://1401b515.m.daocloud.io" 
+      args:
+        executable: /bin/bash
     - name: 检查linux系统配置文件中，网桥arptables的设定 
       lineinfile:
         dest: /etc/sysctl.d/99-sysctl.conf
@@ -34,6 +34,10 @@
         dest: /etc/sysctl.d/99-sysctl.conf
         state: present
         line: "net.bridge.bridge-nf-call-iptables = 1"
+    - name: 复制docker系统服务
+      copy: 
+        src: ../files/system/docker.service.d 
+        dest: /etc/systemd/system/
     - name: 重启系统服务
       command: systemctl daemon-reload
     - name: 启用docker
@@ -52,13 +56,9 @@
       command: gpasswd -a {{ owner }} docker
     - name: 初始化network 
       command: docker network create {{ owner }}
-    - name: 添加daocloud加速器 
-      shell: "curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://1401b515.m.daocloud.io" 
+    - name: 开启ip的forward 
+      shell: iptables -P FORWARD ACCEPT 
       args:
         executable: /bin/bash
-    - name: 重启docker
-      service:
-        name: docker 
-        state: restarted
   become: yes
   gather_facts: no

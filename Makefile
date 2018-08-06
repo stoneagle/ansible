@@ -36,11 +36,20 @@ vmware:
 	ansible-playbook ./project/develop/playbook/docker.yml -i ./hosts -e "group=develop" -K -k && \
 	ansible-playbook ./project/develop/playbook/docker.yml -i ./hosts -e "group=develop" -K -k
 
-k8s-dev:
+k8s-dev-master:
 	ansible-playbook ./project/k8s-dev/playbook/system.yml -i ./hosts -e "group=master" -K -k && \
 	ansible-playbook ./project/k8s-dev/playbook/docker.yml -i ./hosts -e "group=master" -K -k && \
 	ansible-playbook ./project/k8s-dev/playbook/onekube.yml -i ./hosts -e "group=master" -K -k && \
+	rm -rf ~/.kube && mkdir ~/.kube && \
 	ansible-playbook ./project/k8s-dev/playbook/local.yml -i ./hosts -e "group=master" -K -k
+
+k8s-dev-node:
+	ansible-playbook ./project/k8s-dev/playbook/system.yml -i ./hosts -e "group=node" -K -k && \
+	ansible-playbook ./project/k8s-dev/playbook/docker.yml -i ./hosts -e "group=node" -K -k && \
+	ansible-playbook ./project/k8s-dev/playbook/node.yml -i ./hosts -e "group=node" -K -k
+
+kube-dev-basic:
+	ansible-playbook ./project/k8s-dev/playbook/basic.yml -i ./hosts -e "group=node" -K -k
 
 plugin:
 	vim +PluginInstall +qall && \

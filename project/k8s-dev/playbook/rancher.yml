@@ -1,0 +1,31 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    - name: 下载docker-compose
+      become: yes
+      become_user: root 
+      become_method: sudo
+      shell: "curl -L https://get.daocloud.io/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m` > /usr/bin/docker-compose" 
+      args:
+        executable: /bin/bash
+    - name: 更新docker-compose命令权限
+      become: yes
+      become_user: root 
+      become_method: sudo
+      file: 
+        path: /usr/bin/docker-compose 
+        mode: 0755
+    - name: 创建rancher目录 
+      file:
+        path: "/home/{{ owner }}/rancher"
+        state: directory 
+    - name: 根据模板生成docker-compose配置
+      template: 
+        src: ../templates/rancher.j2 
+        dest: /home/{{ owner }}/rancher/docker-compose.yml
+    - name: 启动rancher服务 
+      shell: cd /home/{{ owner }}/rancher && docker-compose up -d
+      args:
+        executable: /bin/bash

@@ -3,25 +3,39 @@
   vars_files:
     - ../inventory/vars/{{ group }}
   tasks:
-    # - name: 更新yum工具至最新版本
-    #   yum: 
-    #     name: '*'
-    #     state: latest 
-    #     exclude: kernel*,centos-release*
+    - name: 获取初始hostname
+      shell: hostname
+      args:
+        executable: /bin/bash
+      register: raw
+    - name: 获取处理后的hostname 
+      shell: hostname | awk '{print tolower($0)}' | sed -e 's/\_//g'
+      args:
+        executable: /bin/bash
+      register: result
+    - name: 替换/etc/hosts中的hostname
+      replace:
+        dest: /etc/hosts
+        regexp: "{{ raw['stdout'] }}" 
+        replace: "{{ result['stdout'] }}"
+    - name: 替换hostname
+      shell: hostnamectl set-hostname {{ result['stdout'] }}
+      args:
+        executable: /bin/bash
     - name: 安装常用软件，系统工具
       yum: 
-        name: ack,htop,sysstat,mlocate,bash-completion,vim 
+        name: ack,htop,sysstat,mlocate,bash-completion,vim,git 
         state: latest
     - name: 安装相关组件
       yum:
         name: yum-utils,device-mapper-persistent-data,lvm2 
         state: latest
     - name: 关闭防火墙 
-      service: 
+      systemd: 
         name: firewalld 
         state: stopped 
     - name: 下线防火墙 
-      service: 
+      systemd: 
         name: firewalld 
         enabled: no 
     - name: 关闭swap内存 
@@ -57,5 +71,9 @@
       service: 
         name: firewalld 
         state: restarted
+    - name: 重启 
+      shell: reboot 
+      args:
+        executable: /bin/bash
   become: yes
   gather_facts: no

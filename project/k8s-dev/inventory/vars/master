@@ -2,7 +2,7 @@ home_dir: /home/wuzhongyang
 owner: wuzhongyang
 owner_group: wuzhongyang
 
-master_ip: 123.207.166.143 
+master_ip: 10.141.17.89
 
 google_prefix: anjia0532/google-containers
 kube_prefix: k8s.gcr.io
@@ -10,3 +10,4 @@ kube_version: 1.11.1
 pause_version: 3.1
 etcd_version: 3.2.18
 coredns_version: 1.1.3
+

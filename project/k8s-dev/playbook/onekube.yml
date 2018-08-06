@@ -9,7 +9,7 @@
         dest: /etc/yum.repos.d/
     - name: 安装相关组件
       yum:
-        name: kubeadm,kubelet,kubectl 
+        name: kubeadm,kubelet,kubectl,ipvsadm
         state: latest
     - name: 启用kubelet
       service: 
@@ -19,7 +19,15 @@
       service: 
         name: kubelet 
         state: started
-    - name: pull-kube-images
+    - name: 复制k8s.conf文件 
+      copy: 
+        src: "../files/k8s.conf" 
+        dest: "/etc/sysctl.d/k8s.conf" 
+    - name: 使k8s.conf修改生效 
+      shell: sysctl -p /etc/sysctl.d/k8s.conf 
+      args:
+        executable: /bin/bash
+    - name: 从国内源拉取kube镜像
       shell: docker pull {{ google_prefix }}.kube-apiserver-amd64:v{{ kube_version }} &&
         docker pull {{ google_prefix }}.kube-controller-manager-amd64:v{{ kube_version }} &&
         docker pull {{ google_prefix }}.kube-scheduler-amd64:v{{ kube_version }} &&
@@ -29,7 +37,7 @@
         docker pull {{ google_prefix }}.coredns:{{ coredns_version }} 
       args:
         executable: /bin/bash
-    - name: tag-kube-images
+    - name: 给kube镜像重新打标签
       shell: docker tag {{ google_prefix }}.kube-apiserver-amd64:v{{ kube_version }} {{ kube_prefix }}/kube-apiserver-amd64:v{{ kube_version }} &&
         docker tag {{ google_prefix }}.kube-controller-manager-amd64:v{{ kube_version }} {{ kube_prefix }}/kube-controller-manager-amd64:v{{ kube_version }} &&
         docker tag {{ google_prefix }}.kube-scheduler-amd64:v{{ kube_version }} {{ kube_prefix }}/kube-scheduler-amd64:v{{ kube_version }} &&
@@ -39,7 +47,7 @@
         docker tag {{ google_prefix }}.coredns:{{ coredns_version }} {{ kube_prefix }}/coredns:{{ coredns_version }}
       args:
         executable: /bin/bash
-    - name: remove-inboard-kube-images
+    - name: 删除kube镜像原先国内标签 
       shell: docker rmi {{ google_prefix }}.kube-apiserver-amd64:v{{ kube_version }} &&
         docker rmi {{ google_prefix }}.kube-controller-manager-amd64:v{{ kube_version }} &&
         docker rmi {{ google_prefix }}.kube-scheduler-amd64:v{{ kube_version }} &&
@@ -53,20 +61,28 @@
       shell: kubeadm init --kubernetes-version=v{{ kube_version }} --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address={{ master_ip }} --feature-gates CoreDNS=true
       args:
         executable: /bin/bash
+    - name: 删除旧版.kube 
+      file:
+        path: "/root/.kube"
+        state: absent 
     - name: 处理root的kubectl
       shell: mkdir -p /root/.kube
       args:
         executable: /bin/bash
     - name: 复制k8s的admin.conf
-      shell: cp -i /etc/kubernetes/admin.conf /root/.kube/config
+      shell: cp /etc/kubernetes/admin.conf /root/.kube/config
       args:
         executable: /bin/bash
+    - name: 删除旧版.kube 
+      file:
+        path: "{{ home_dir }}/.kube"
+        state: absent 
     - name: 处理kubectl
       shell: mkdir -p {{ home_dir }}/.kube
       args:
         executable: /bin/bash
     - name: 复制k8s的admin.conf
-      shell: cp -i /etc/kubernetes/admin.conf {{ home_dir }}/.kube/config
+      shell: cp /etc/kubernetes/admin.conf {{ home_dir }}/.kube/config
       args:
         executable: /bin/bash
     - name: 更改admin-conf的权限 
@@ -79,9 +95,9 @@
       shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documentation/kube-flannel.yml
       args:
         executable: /bin/bash
-    - name: 允许master节点调度
-      shell: kubectl taint nodes --all node-role.kubernetes.io/master-
-      args:
-        executable: /bin/bash
+    # - name: 允许master节点调度
+    #   shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+    #   args:
+    #     executable: /bin/bash
   become: yes
   gather_facts: no

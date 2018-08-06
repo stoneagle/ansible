@@ -1,0 +1,37 @@
+---
+- hosts: "{{ group }}"
+  vars_files:
+    - ../inventory/vars/{{ group }}
+  tasks:
+    - name: 拉取dashboard镜像
+      shell: docker pull {{ google_prefix }}.kubernetes-dashboard-amd64:{{ kube_dashboard_version }} &&
+        docker tag {{ google_prefix }}.kubernetes-dashboard-amd64:{{ kube_dashboard_version }} {{ kube_prefix }}/kubernetes-dashboard-amd64:{{ kube_dashboard_version }} &&
+        docker rmi {{ google_prefix }}.kubernetes-dashboard-amd64:{{ kube_dashboard_version }}
+      args:
+        executable: /bin/bash
+    - name: 从github获取basic组件的k8s配置
+      git:
+        repo: "{{ basic_git_href }}" 
+        dest: "{{ home_dir }}/basic" 
+        clone: yes 
+        update: yes
+    - name: 启动envoy服务
+      shell: cd {{ home_dir }}/basic/k8s && kubectl create -f ./envoy.yml
+      args:
+        executable: /bin/bash
+    - name: 启动dashboard服务 
+      shell: cd {{ home_dir }}/basic/k8s && kubectl create -f ./dashboard.yml
+      args:
+        executable: /bin/bash
+    - name: 创建mysql本地卷目录 
+      file:
+        path: "{{ home_dir }}/database/mysql"
+        state: directory 
+    - name: 加载本地卷配置 
+      shell: cd {{ home_dir }}/basic/k8s && kubectl create -f ./volume.yml
+      args:
+        executable: /bin/bash
+    - name: 启动mysql 
+      shell: cd {{ home_dir }}/basic/k8s && kubectl create -f ./mysql.yml
+      args:
+        executable: /bin/bash
