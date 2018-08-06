@@ -35,3 +35,7 @@
       shell: cd {{ home_dir }}/basic/k8s && kubectl create -f ./mysql.yml
       args:
         executable: /bin/bash
+    - name: 启动redis
+      shell: cd {{ home_dir }}/basic/k8s && kubectl create -f ./redis.yml
+      args:
+        executable: /bin/bash
